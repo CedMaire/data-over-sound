@@ -1,0 +1,3 @@
+https://github.com/rraval/pied-piper
+https://pypi.org/project/reedsolo/
+https://pypi.org/project/unireedsolomon/

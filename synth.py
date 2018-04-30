@@ -1,0 +1,3 @@
+# Receive the k bit vectors from the coder and generate the corresponding sound/signal.
+# Send in both noise-free bands at the same time. Each chunk sent during T seconds.
+# + All reverse ops (from signal you listen to, to bit vector)...
