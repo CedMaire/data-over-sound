@@ -29,5 +29,6 @@ def sendBitArray(array, time):
     sd.play(signal,fs)
     sd.wait()
 
+#Test
 a=[1,0,1,0,1]
 sendBitArray(a,10)
