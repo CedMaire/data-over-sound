@@ -1,1 +1,3 @@
-# To be deleted or used for external parameters used everywhere.
+UTF_8 = "utf-8"
+FILENAME_READ = "read.txt"
+FILENAME_WRITE = "write.txt"

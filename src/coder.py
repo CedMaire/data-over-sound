@@ -6,8 +6,8 @@
 # Decode: Assemble, RecoverBits, Recover ECC
 
 import unireedsolomon as ReedSalomon
+import lib as Lib
 
-UTF_8 = "utf-8"
 CODE_WORD_LENGTH = 255
 MESSAGE_LENGTH = 180
 
@@ -42,3 +42,23 @@ class Coder:
 
     def recoverBits(self, tupleList):
         return tupleList
+
+    def stringToListOfByteVectors(self, string):
+        tmp = list(map(lambda x: bin(x)[2:], string.encode(Lib.UTF_8)))
+
+        output = list()
+        for e in tmp:
+            test = list()
+            for i in e:
+                test.append(int(i))
+            output.append(test)
+
+        for e in output:
+            if len(e) < 8:
+                for i in range(8-len(e)):
+                    e.insert(0, 0)
+
+        return output
+
+    def listOfByteVectorsToString(self, byteVectors):
+        return byteVectors
