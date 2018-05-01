@@ -1,7 +1,7 @@
 import lib as Lib
 
 
-class IO:
+class IODeux:
     def __init__(self):
         pass
 

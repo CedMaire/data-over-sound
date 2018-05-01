@@ -2,47 +2,72 @@
 # Reed Salomon or Polar Code and "randomize" the byte/bit vectors to have P(0) = P(1) = 1/2 (Mult by huge
 # prime + mod 256). + All the reverse operations.
 
-# Encode: Apply ECC, Randomize, Chunck
-# Decode: Assemble, RecoverBits, Recover ECC
+# Encode: Apply ECC, Randomize, To bit vectors, Chunck
+# Decode: Assemble, RecoverBits, to string, Recover ECC
 
 import unireedsolomon as ReedSalomon
 import lib as Lib
-
-CODE_WORD_LENGTH = 255
-MESSAGE_LENGTH = 180
-
-RSCoder = ReedSalomon.rs.RSCoder(CODE_WORD_LENGTH, MESSAGE_LENGTH)
 
 
 class Coder:
     # Constuctor, initializes the parameters.
     def __init__(self):
-        pass
+        self.RSCoder = ReedSalomon.rs.RSCoder(
+            Lib.CODE_WORD_LENGTH, Lib.MESSAGE_LENGTH)
 
     def encode(self, string):
+        # TODO:
         return string
 
     def decode(self, tupleList):
+        # TODO:
         return tupleList
 
-    def chunk(self, tupleList):
-        return tupleList
+    # Chunks the 8-bit vectors into smaller vectors.
+    def chunk(self, vectorList):
+        # Chunk
+        chuncked = list(map(lambda vector: [vector[i:i + Lib.CHUNK_SIZE] for i in range(0, len(vector), Lib.CHUNK_SIZE)],
+                            vectorList))
 
-    def assemble(self, tupleList):
-        return tupleList
+        # Flatten
+        outputList = list()
+        for i in range(0, len(chuncked)):
+            for j in range(0, len(chuncked[i])):
+                outputList.append(chuncked[i][j])
 
+        return outputList
+
+    # Assembles the k-bit vectors to have 8-bit vectors again.
+    def assemble(self, vectorList):
+        output = list()
+        step = int(Lib.BYTE_BIT_SIZE / Lib.CHUNK_SIZE)
+
+        for i in range(0, len(vectorList), step):
+            tempList = list()
+            for j in range(0, step):
+                tempList.append(vectorList[i + j])
+            output.append([bit for vector in tempList for bit in vector])
+
+        return output
+
+    # Applies an error correcting encoding. In this case it is the Reed Solomon ECC.
     def applyEcc(self, string):
-        return RSCoder.encode(string)
+        return self.RSCoder.encode(string)
 
+    # Tries to recover the original string from a received Reed Solomon ECC.
     def recoverEcc(self, string):
-        return RSCoder.decode(string)
+        return self.RSCoder.decode(string)[0]
 
-    def randomizeBits(self, tupleList):
-        return tupleList
+    def randomizeBits(self, byteList):
+        # TODO:
+        return byteList
 
-    def recoverBits(self, tupleList):
-        return tupleList
+    def recoverBits(self, byteList):
+        # TODO:
+        return byteList
 
+    # Converts a regular string into a list of 8-bit vectors.
+    # "He" -> [[0, 1, 0, 0, 1, 0, 0, 0], [0, 1, 1, 0, 0, 1, 0, 1]]
     def stringToListOfByteVectors(self, string):
         tmp = list(map(lambda x: bin(x)[2:], string.encode(Lib.UTF_8)))
 
@@ -60,5 +85,11 @@ class Coder:
 
         return output
 
+    # Converts a list of 8-bit vectors to a regular string (with accents).
+    # [[0, 1, 0, 0, 1, 0, 0, 0], [0, 1, 1, 0, 0, 1, 0, 1]] -> "He"
     def listOfByteVectorsToString(self, byteVectors):
-        return byteVectors
+        return bytes(list(
+            map(lambda bitString: int(bitString, 2),
+                map(lambda vector: "".join(
+                    map(lambda x: repr(x), vector)), byteVectors)))).decode(
+                        Lib.UNICODE_ESCAPE).encode(Lib.LATIN_1).decode(Lib.UTF_8)
