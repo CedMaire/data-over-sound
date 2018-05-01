@@ -1,3 +1,5 @@
 https://github.com/rraval/pied-piper
 https://pypi.org/project/reedsolo/
 https://pypi.org/project/unireedsolomon/
+https://github.com/fredrik-johansson/mpmath
+http://mpmath.org/doc/current/index.html
