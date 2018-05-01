@@ -3,7 +3,7 @@
 import lib as Lib
 
 if __name__ == '__main__':
-    file = open(file="text.txt", mode="r", encoding=Lib.UTF_8)
+    file = open(file="../text.txt", mode="r", encoding=Lib.UTF_8)
 
     print()
 
