@@ -1,12 +1,6 @@
-# Encode and decode byte/bit vectors. Chunk them in the right size, apply error recovery algorithms like
-# Reed Salomon or Polar Code and "randomize" the byte/bit vectors to have P(0) = P(1) = 1/2 (Mult by huge
-# prime + mod 256). + All the reverse operations.
-
-# Encode: Apply ECC, Randomize, To bit vectors, Chunck
-# Decode: Assemble, RecoverBits, to string, Recover ECC
-
 import unireedsolomon as ReedSalomon
 import lib as Lib
+import mpmath as BigNumbers
 
 
 class Coder:
@@ -15,13 +9,21 @@ class Coder:
         self.RSCoder = ReedSalomon.rs.RSCoder(
             Lib.CODE_WORD_LENGTH, Lib.MESSAGE_LENGTH)
 
+    # Encodes the string so that it can be sent as k bits at a time.
     def encode(self, string):
-        # TODO:
-        return string
+        rsEncodedString = self.applyEcc(string)
+        byteVectorList = self.stringToListOfByteVectors(rsEncodedString)
+        chunkedVectorsList = self.chunk(byteVectorList)
 
+        return chunkedVectorsList
+
+    # Decodes k-bit vectors to get back a readable string.
     def decode(self, tupleList):
-        # TODO:
-        return tupleList
+        assembledVectorsList = self.assemble(tupleList)
+        stringReceived = self.listOfByteVectorsToString(assembledVectorsList)
+        rsDecodedString = self.recoverEcc(stringReceived)
+
+        return rsDecodedString
 
     # Chunks the 8-bit vectors into smaller vectors.
     def chunk(self, vectorList):
@@ -58,18 +60,35 @@ class Coder:
     def recoverEcc(self, string):
         return self.RSCoder.decode(string)[0]
 
-    def randomizeBits(self, byteList):
-        # TODO:
-        return byteList
+    # Randomizes the bytes to expect having a P(0)=P(1)=1/2 so that we can use an ML rule.
+    def randomizeBytes(self, byteString):
+        '''
+        output = map(lambda x: int.from_bytes(
+            [x], byteorder=Lib.BYTE_ENDIANESS) + 1, byteString)
+        output = map(lambda x: BigNumbers.fmul(
+            x, Lib.BIG_PRIME_NUMBER), output)
+        output = map(lambda x: BigNumbers.fmod(
+            x, Lib.BYTE_DIFF_VALUES), output)
+        output = map(lambda x: int(BigNumbers.nstr(
+            x)[: - 2]), output)
+        '''
+        output = map(lambda x: Lib.BYTE_RANDOMIZE_MAP.get(int.from_bytes(
+            [x], byteorder=Lib.BYTE_ENDIANESS)), byteString)
 
-    def recoverBits(self, byteList):
-        # TODO:
-        return byteList
+        return bytes(output)
+
+    # Recovers the original bytes that have been randomized.
+    def recoverBytes(self, byteString):
+        output = map(lambda x: Lib.BYTE_RECOVER_MAP.get(int.from_bytes(
+            [x], byteorder=Lib.BYTE_ENDIANESS)), byteString)
+
+        return bytes(output)
 
     # Converts a regular string into a list of 8-bit vectors.
     # "He" -> [[0, 1, 0, 0, 1, 0, 0, 0], [0, 1, 1, 0, 0, 1, 0, 1]]
     def stringToListOfByteVectors(self, string):
-        tmp = list(map(lambda x: bin(x)[2:], string.encode(Lib.UTF_8)))
+        tmp = list(
+            map(lambda x: bin(x)[2:], self.randomizeBytes(string.encode(Lib.UTF_8))))
 
         output = list()
         for e in tmp:
@@ -88,8 +107,8 @@ class Coder:
     # Converts a list of 8-bit vectors to a regular string (with accents).
     # [[0, 1, 0, 0, 1, 0, 0, 0], [0, 1, 1, 0, 0, 1, 0, 1]] -> "He"
     def listOfByteVectorsToString(self, byteVectors):
-        return bytes(list(
+        return self.recoverBytes(bytes(list(
             map(lambda bitString: int(bitString, 2),
                 map(lambda vector: "".join(
-                    map(lambda x: repr(x), vector)), byteVectors)))).decode(
+                    map(lambda x: repr(x), vector)), byteVectors))))).decode(
                         Lib.UNICODE_ESCAPE).encode(Lib.LATIN_1).decode(Lib.UTF_8)

@@ -10,7 +10,8 @@ class IODeux:
         string = file.read()
         file.close()
 
-        print("Read:\n" + string)
+        print("READ:")
+        print(string)
 
         return string
 
@@ -19,6 +20,7 @@ class IODeux:
         file.write(string)
         file.close()
 
-        print("Write:\n" + string)
+        print("WRITTEN:")
+        print(string)
 
         return True
