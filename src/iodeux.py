@@ -1,4 +1,8 @@
 import lib as Lib
+import numpy as np
+
+np.random.seed(42)
+print(np.random.randint(20, size=(20)))
 
 
 class IODeux:

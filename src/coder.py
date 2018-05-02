@@ -7,7 +7,7 @@
 
 import unireedsolomon as ReedSalomon
 import lib as Lib
-
+import numpy as np
 
 class Coder:
     # Constuctor, initializes the parameters.
@@ -92,4 +92,11 @@ class Coder:
             map(lambda bitString: int(bitString, 2),
                 map(lambda vector: "".join(
                     map(lambda x: repr(x), vector)), byteVectors)))).decode(
-                        Lib.UNICODE_ESCAPE).encode(Lib.LATIN_1).decode(Lib.UTF_8)
+                        Lib.UNICODE_ESCAPE).encode(Lib.LATIN_1).decode(Lib.UTF_8);
+
+    def createRandomArray(array_size, seed, max_value):
+    	np.random.seed(seed)
+    	tmp = np.random.randint(max_value, size=(array_size))
+    	return tmp
+
+    
