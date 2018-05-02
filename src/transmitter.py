@@ -17,3 +17,5 @@ if __name__ == '__main__':
     print(decodedString)
 
     io.writeFile(Lib.FILENAME_WRITE, decodedString)
+
+    print("Same string? - " + repr(stringRead == decodedString))

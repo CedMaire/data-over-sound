@@ -1,6 +1,7 @@
 import unireedsolomon as ReedSalomon
 import lib as Lib
 import mpmath as BigNumbers
+import numpy as np
 
 
 class Coder:
@@ -112,3 +113,9 @@ class Coder:
                 map(lambda vector: "".join(
                     map(lambda x: repr(x), vector)), byteVectors))))).decode(
                         Lib.UNICODE_ESCAPE).encode(Lib.LATIN_1).decode(Lib.UTF_8)
+
+    # Creates a random array using a seed.
+    def createRandomArray(self, array_size, seed, max_value):
+        np.random.seed(seed)
+        tmp = np.random.randint(max_value, size=(array_size))
+        return tmp
