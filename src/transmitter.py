@@ -12,10 +12,14 @@ if __name__ == '__main__':
     print("ENCODED VECTORS:")
     print(encodedVectors)
 
-    decodedString = coder.decode(encodedVectors)
+    decodedTuple = coder.decode(encodedVectors)
+    decodedString = decodedTuple[1]
     print("DECODED STRING:")
     print(decodedString)
 
-    io.writeFile(Lib.FILENAME_WRITE, decodedString)
+    if (decodedTuple[0]):
+        io.writeFile(Lib.FILENAME_WRITE, decodedString)
 
-    print("Same string? - " + repr(stringRead == decodedString))
+        print("Same string? - " + repr(stringRead == decodedString))
+    else:
+        print(decodedTuple[1])

@@ -9,6 +9,29 @@ class Coder:
     def __init__(self):
         self.RSCoder = ReedSalomon.rs.RSCoder(
             Lib.CODE_WORD_LENGTH, Lib.MESSAGE_LENGTH)
+        self.receivedData = list()
+
+    # TODO: Test
+    def newVectorReceived(self, vector):
+        self.receivedData.append(vector)
+        length = len(self.receivedData)
+
+        while (self.dataReceivedIsTooLong(length)):
+            self.receivedData.pop(0)
+
+        if (self.dataReceivedHasRightLength(length)):
+            return self.decode(self.receivedData)
+        else:
+            print(Lib.DECODING_NOT_READY)
+            return (False, Lib.DECODING_NOT_READY)
+
+    # Checks if the received data is too long.
+    def dataReceivedIsTooLong(self, length):
+        return length > Lib.NEEDED_AMOUNT_OF_VECTORS
+
+    # Checks if the received data has the correct lenght.
+    def dataReceivedHasRightLength(self, length):
+        return length == Lib.NEEDED_AMOUNT_OF_VECTORS
 
     # Encodes the string so that it can be sent as k bits at a time.
     def encode(self, string):
@@ -20,11 +43,19 @@ class Coder:
 
     # Decodes k-bit vectors to get back a readable string.
     def decode(self, tupleList):
-        assembledVectorsList = self.assemble(tupleList)
-        stringReceived = self.listOfByteVectorsToString(assembledVectorsList)
-        rsDecodedString = self.recoverEcc(stringReceived)
+        output = Lib.DECODING_FAILED
+        isDecoded = False
 
-        return rsDecodedString
+        try:
+            assembledVectorsList = self.assemble(tupleList)
+            stringReceived = self.listOfByteVectorsToString(
+                assembledVectorsList)
+            output = self.recoverEcc(stringReceived)
+            isDecoded = True
+        except:
+            print(Lib.DECODING_FAILED)
+
+        return (isDecoded, output)
 
     # Chunks the 8-bit vectors into smaller vectors.
     def chunk(self, vectorList):
