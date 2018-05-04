@@ -3,7 +3,7 @@
 # + All reverse ops (from signal you listen to, to bit vector)...
 import numpy as np
 import sounddevice as sd
-
+import matplotlib.pyplot as plt
 
 # send an array, k bit at a time. It will devide the frequency domain in equal
 # part and send at the divinding frequencies. Produce for the two domain.
@@ -20,15 +20,30 @@ def sendBitArray(array, time):
     # prepare the sinuses
     t = np.arange(time*fs)
     signal = np.zeros(t.shape)
-    print("Sending at base frequencie(s) (also sending at f+1000) : ")
+    print("Sending at frequencie(s) (also sending at f+1000) : ")
     for f in freqs:
         signal = signal + np.sin(2*np.pi*t*f/fs)  # 1st noise
         signal = signal + np.sin(2*np.pi*t*(1000+f)/fs)  # 2nd noise
         print(f)
     sd.play(signal, fs)
+
+    x=np.arange(0,500,1)
+    sub=signal[0:500]
+    plt.plot(x, sub)
+    plt.show()
     sd.wait()
+
+
+
+#time : in seconds
+def receiveAndFFT(time):
+    fs=44100
+    sd.default.channels=1
+    record=sd.rec(10*fs,fs,blocking=True) #See if we can't do this in background
+
 
 
 # Test
 a = [1, 0, 1, 0, 1]
-sendBitArray(a, 10)
+sendBitArray(a, 2)
+#receive(10)
