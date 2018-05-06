@@ -6,6 +6,17 @@ import sounddevice as sd
 import matplotlib.pyplot as plt
 
 fs = 44100
+
+#Create and send a white noise with a N(0,1)
+def sendWhiteNoise(time):
+    sample=fs*time
+    noise=np.random.normal(0,1,sample)
+    sd.play(noise)
+    sd.wait()
+    #plt.plot(noise)
+    #plt.show()
+
+
 # send an array, k bit at a time. It will devide the frequency domain in equal
 # part and send at the divinding frequencies. Produce for the two domain.
 # use time to change in sec the time of the transmission
@@ -48,6 +59,7 @@ def receiveAndFFT(time):
 
 
 #TEST
-a = [0, 0, 1, 0, 0] #apparently, 1500hz doesn't work...
-sendBitArray(a, 2)
+sendWhiteNoise(5)
+#a = [0, 0, 1, 0, 0] #apparently, 1500hz doesn't work...
+#sendBitArray(a, 2)
 #receiveAndFFT(2)
