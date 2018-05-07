@@ -37,29 +37,34 @@ def sendBitArray(array, time):
         signal = signal + np.sin(2*np.pi*t*(1000+f)/fs)  # 2nd noise
         print(f)
     #sd.play(signal, fs)
+    #plotting the signal
     x=np.arange(0,500,1)
     sub=signal[0:500]
     plt.plot(x, sub)
     plt.show()
 
 #TEST
+    fft=np.fft.fft(signal[0:fs])
+    hz=np.arange(0,fs)
+    plt.plot(hz,np.abs(fft))
+    plt.show()
 
-#TEST
+#/TEST
     #sd.wait()
 
 #time : in seconds
 def receiveAndFFT(time):
     sd.default.channels=1
     record=sd.rec(time*fs,fs,blocking=True)
-    rfft=np.fft.rfft(signal[0:fs])
-    hz=np.arange(0,fs//2+1)
-    plt.plot(hz,rfft)
+    fft=np.fft.fft(record[0:fs])
+    hz=np.arange(0,fs)
+    plt.plot(hz,np.abs(fft))
     plt.show()
 
 
 
 #TEST
-sendWhiteNoise(5)
-#a = [0, 0, 1, 0, 0] #apparently, 1500hz doesn't work...
-#sendBitArray(a, 2)
+#sendWhiteNoise(5)
+a = [0, 0, 1, 0, 0] #apparently, 1500hz doesn't work...
+sendBitArray(a, 5)
 #receiveAndFFT(2)
