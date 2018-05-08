@@ -35,8 +35,8 @@ def findPeaks(frequence, signal, ones):
         idx = np.argmax(np.abs(w))
         w = np.delete(w, idx)
         i+=1
-
-    print(peaks)    
+    peaks=np.sort(peaks)
+    print(peaks)
 
 
 # send an array, k bit at a time. It will devide the frequency domain in equal
@@ -68,9 +68,9 @@ def sendBitArray(array, time):
     #plt.show()
 
 #TEST
-    
+
     findPeaks(fs, signal, ones)
-    
+
     # fft=np.fft.fft(signal[0:fs])
     # hz=np.arange(0,fs)
     # tmp_freq = np.fft.fftfreq(len(fft))
@@ -96,10 +96,6 @@ def receiveAndFFT(time):
 
 #TEST
 #sendWhiteNoise(5)
-a = [1, 0, 1, 0, 0] #apparently, 1500hz doesn't work...
+a = [1, 1, 1, 0, 0] #apparently, 1500hz doesn't work...
 sendBitArray(a, 5)
 #receiveAndFFT(2)
-
-
-
-    

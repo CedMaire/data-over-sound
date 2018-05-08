@@ -4,24 +4,24 @@
 import numpy as np
 import sounddevice as sd
 import matplotlib.pyplot as plt
+import lib as lib
 
-fs = 44100
 
-#Create and send a white noise with a N(0,1)
-def sendWhiteNoise(time):
-    sample=fs*time
+
+
+#Create a white noise with a N(0,1), with the seed 42
+def createWhiteNoise(time=lib.NOISE_TIME):
+    sample=lib.FS*time
     np.random.seed(42)
     noise=np.random.normal(0,1,sample)
-    #sd.play(noise)
-    #sd.wait()
-    plt.plot(noise)
-    plt.show()
+    return noise
 
 
 # send an array, k bit at a time. It will devide the frequency domain in equal
 # part and send at the divinding frequencies. Produce for the two domain.
 # use time to change in sec the time of the transmission
-def sendBitArray(array, time):
+#return the sended array
+def sendBitArray(array, time=lib.TIME_BY_CHUNK):
     k = len(array)
     freqs = []
     # calculate the frequencies
@@ -30,42 +30,78 @@ def sendBitArray(array, time):
         if(array[i] == 1):
             freqs.append(1000+step*(i+1))
     # prepare the sinuses
-    t = np.arange(time*fs)
+    t = np.arange(time*lib.FS)
     signal = np.zeros(t.shape)
     print("Sending at frequencie(s) (also sending at f+1000) : ")
     for f in freqs:
-        signal = signal + np.sin(2*np.pi*t*f/fs)  # 1st noise
-        signal = signal + np.sin(2*np.pi*t*(1000+f)/fs)  # 2nd noise
+        signal = signal + np.sin(2*np.pi*t*f/lib.FS)  # 1st noise
+        signal = signal + np.sin(2*np.pi*t*(1000+f)/lib.FS)  # 2nd noise
         print(f)
     #sd.play(signal, fs)
-    #plotting the signal
-    x=np.arange(0,500,1)
-    sub=signal[0:500]
-    plt.plot(x, sub)
-    plt.show()
-
-#TEST
-    fft=np.fft.fft(signal[0:fs])
-    hz=np.arange(0,fs)
-    plt.plot(hz,np.abs(fft))
-    plt.show()
-
+    #
+    return signal
 #/TEST
     #sd.wait()
 
 #time : in seconds
-def receiveAndFFT(time):
+def receive(time=2*lib.TOTAL_ELEM_NUMBER):
     sd.default.channels=1
     record=sd.rec(time*fs,fs,blocking=True)
-    fft=np.fft.fft(record[0:fs])
-    hz=np.arange(0,fs)
-    plt.plot(hz,np.abs(fft))
-    plt.show()
+    return record
+
+#Synchronise the record, return the sub-array of record starting at the end of
+#the white noise with the length TOTAL_ELEM_NUMBER
+def sync(record):
+    noise=createWhiteNoise()
+    noiseLength=lib.FS*lib.NOISE_TIME
+    maxdot=0
+    index=0
+    for i in range (record.size - noiseLength):
+        dot=np.dot(noise,record[i:noiseLength+i])
+        if (dot>maxdot):
+            maxdot=dot
+            index=i
+        i+=1
+        print(i, dot, index, maxdot)
+    begin=index+lib.NOISE_TIME*lib.FS
+    end = begin+lib.TOTAL_ELEM_NUMBER
+    print(begin, end)
+    return record[begin:end]
+
+def findPeaks(frequence, signal, ones):
+    w = np.fft.fft(signal)
+    f = np.fft.fftfreq(len(w))
+    #print(f)
+    #print(f.min(), f.max())
+
+    peaks = np.empty(2*ones)
+    i = 0
+    for x in range(2*ones):
+        idx = np.argmax(np.abs(w))
+        freq = f[idx]
+        freq_in_hertz = abs(freq * frequence)
+        print(freq_in_hertz)
+        peaks[i]=freq_in_hertz
+
+        w = np.delete(w, idx)
+        idx = np.argmax(np.abs(w))
+        w = np.delete(w, idx)
+        i+=1
+    peaks=np.sort(peaks)
+    print(peaks)
+
 
 
 
 #TEST
-sendWhiteNoise(5)
-#a = [0, 0, 1, 0, 0] #apparently, 1500hz doesn't work...
-#sendBitArray(a, 5)
+noise=createWhiteNoise(lib.NOISE_TIME)
+a = [0, 0, 1, 0, 0]
+signal=sendBitArray(a)
+print(noise.shape, signal.shape)
+sent=np.concatenate([noise,signal])
+plt.plot(sent)
+plt.show()
+sync=sync(sent)
+plt.plot(sync)
+plt.show()
 #receiveAndFFT(2)
