@@ -10,11 +10,12 @@ fs = 44100
 #Create and send a white noise with a N(0,1)
 def sendWhiteNoise(time):
     sample=fs*time
+    np.random.seed(42)
     noise=np.random.normal(0,1,sample)
-    sd.play(noise)
-    sd.wait()
-    #plt.plot(noise)
-    #plt.show()
+    #sd.play(noise)
+    #sd.wait()
+    plt.plot(noise)
+    plt.show()
 
 
 # send an array, k bit at a time. It will devide the frequency domain in equal
@@ -64,7 +65,7 @@ def receiveAndFFT(time):
 
 
 #TEST
-#sendWhiteNoise(5)
-a = [0, 0, 1, 0, 0] #apparently, 1500hz doesn't work...
-sendBitArray(a, 5)
+sendWhiteNoise(5)
+#a = [0, 0, 1, 0, 0] #apparently, 1500hz doesn't work...
+#sendBitArray(a, 5)
 #receiveAndFFT(2)
