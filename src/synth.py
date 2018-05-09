@@ -21,13 +21,13 @@ def createWhiteNoise(time=lib.NOISE_TIME,seed=42):
 # part and send at the divinding frequencies. Produce for the two domain.
 # use time to change in sec the time of the transmission
 #return the sended array
-def sendBitArray(array, time=lib.TIME_BY_CHUNK):
-    k = len(array)
+def sendVector(vector, time=lib.TIME_BY_CHUNK):
+    k = len(vector)
     freqs = []
     # calculate the frequencies
     step = 1000/(k+1)
     for i in range(0, k):
-        if(array[i] == 1):
+        if(vector[i] == 1):
             freqs.append(1000+step*(i+1))
     # prepare the sinuses
     t = np.arange(time*lib.FS)
@@ -38,6 +38,14 @@ def sendBitArray(array, time=lib.TIME_BY_CHUNK):
         signal = signal + np.sin(2*np.pi*t*(1000+f)/lib.FS)  # 2nd noise
         print(f)
     return signal
+
+def sendArrayVector(array):
+  signal=np.zeros(0)
+  for x in array:
+      inter=sendVector(x,0.01)
+      print(inter)
+      signal=np.concatenate([signal,inter])
+  return signal
 
 #time : in seconds
 def receive(time=2*lib.TIME_BY_CHUNK):
@@ -97,12 +105,15 @@ sd.wait()
 
 #Local test
 
-noise=createWhiteNoise()
-noise2=createWhiteNoise(lib.NOISE_TIME,3)
-noise3=createWhiteNoise(lib.TIME_BY_CHUNK,1)
-a = [1]
-signal=sendBitArray(a)
-signal+=noise3
+#noise=createWhiteNoise()
+#noise2=createWhiteNoise(lib.NOISE_TIME,3)
+#noise3=createWhiteNoise(lib.TIME_BY_CHUNK,1)
+a = [[1,0],[1,1]]
+signal=sendArrayVector(a)
+print(signal)
+plt.plot(signal)
+plt.show()
+'''signal+=noise3
 midSignal=np.concatenate([noise,signal])
 fullSignal=np.concatenate([noise2,midSignal])
 plt.plot(fullSignal)
@@ -112,7 +123,7 @@ plt.plot(sync)
 plt.show()
 peaks=findPeaks(sync,1)
 print(peaks)
-
+'''
 
 #Receiving
 '''
