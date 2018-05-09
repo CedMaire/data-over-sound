@@ -54,10 +54,8 @@ def sync(record):
     index=0
     for i in range (record.size - noiseLength):
         dot=np.dot(noise,record[i:noiseLength+i])
-        dotarray[i]=dot
         if (dot>40): print(i,dot)
         if (dot< -40): print(i,dot)
-
         if (dot>maxdot):
             maxdot=dot
             index=i
@@ -88,7 +86,7 @@ def findPeaks(signal, ones,frequence=lib.FS):
 #TEST
 
 #Sending
-'''
+
 noise=createWhiteNoise(lib.NOISE_TIME)
 a = [1]
 signal=sendBitArray(a)
@@ -97,7 +95,7 @@ plt.plot(fullSignal)
 plt.show()
 sd.play(fullSignal)
 sd.wait()
-'''
+
 
 #Local test
 '''
@@ -134,7 +132,7 @@ print(peaks)
 '''
 
 #tests with sync.numpy
-
+'''
 rec=np.load("rec.npy")[:,0]
 sinus=np.load("sinus1500.npy")
 sinus=sinus[0:lib.FS]
@@ -145,3 +143,4 @@ plt.plot(sync)
 plt.plot(sinus)
 plt.show()
 findPeaks(sync,10)
+'''
