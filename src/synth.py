@@ -10,9 +10,9 @@ import lib as lib
 
 
 #Create a white noise with a N(0,1), with the seed 42
-def createWhiteNoise(time=lib.NOISE_TIME):
+def createWhiteNoise(time=lib.NOISE_TIME,seed=42):
     sample=lib.FS*time
-    np.random.seed(42)
+    np.random.seed(seed)
     noise=np.random.normal(0,1,sample)
     return noise
 
@@ -35,7 +35,7 @@ def sendBitArray(array, time=lib.TIME_BY_CHUNK):
     print("Sending at frequencie(s) (also sending at f+1000) : ")
     for f in freqs:
         signal = signal + np.sin(2*np.pi*t*f/lib.FS)  # 1st noise
-        signal = signal + np.sin(2*np.pi*t*(1000+f)/lib.FS)  # 2nd noise
+    #    signal = signal + np.sin(2*np.pi*t*(1000+f)/lib.FS)  # 2nd noise
         print(f)
     #sd.play(signal, fs)
     #
@@ -46,7 +46,7 @@ def sendBitArray(array, time=lib.TIME_BY_CHUNK):
 #time : in seconds
 def receive(time=2*lib.TOTAL_ELEM_NUMBER):
     sd.default.channels=1
-    record=sd.rec(time*fs,fs,blocking=True)
+    record=sd.rec(time*lib.FS,lib.FS,blocking=True)
     return record
 
 #Synchronise the record, return the sub-array of record starting at the end of
@@ -62,13 +62,11 @@ def sync(record):
             maxdot=dot
             index=i
         i+=1
-        print(i, dot, index, maxdot)
     begin=index+lib.NOISE_TIME*lib.FS
     end = begin+lib.TOTAL_ELEM_NUMBER
-    print(begin, end)
     return record[begin:end]
 
-def findPeaks(frequence, signal, ones):
+def findPeaks(signal, ones,frequence=lib.FS):
     w = np.fft.fft(signal)
     f = np.fft.fftfreq(len(w))
     #print(f)
@@ -79,8 +77,7 @@ def findPeaks(frequence, signal, ones):
     for x in range(2*ones):
         idx = np.argmax(np.abs(w))
         freq = f[idx]
-        freq_in_hertz = abs(freq * frequence)
-        print(freq_in_hertz)
+        freq_in_hertz = abs(freq * lib.FS)
         peaks[i]=freq_in_hertz
 
         w = np.delete(w, idx)
@@ -88,20 +85,34 @@ def findPeaks(frequence, signal, ones):
         w = np.delete(w, idx)
         i+=1
     peaks=np.sort(peaks)
-    print(peaks)
+    return peaks
 
 
 
 
 #TEST
+'''
 noise=createWhiteNoise(lib.NOISE_TIME)
-a = [0, 0, 1, 0, 0]
+a = [1]
 signal=sendBitArray(a)
-print(noise.shape, signal.shape)
-sent=np.concatenate([noise,signal])
-plt.plot(sent)
+fullSignal=np.concatenate([noise,signal])
+plt.plot(fullSignal)
 plt.show()
-sync=sync(sent)
+sd.play(fullSignal)
+sd.wait()
+'''
+#receiveAndFFT(2)
+
+noise=createWhiteNoise()
+noise2=createWhiteNoise(lib.NOISE_TIME,3)
+a = [1]
+signal=sendBitArray(a)
+midSignal=np.concatenate([noise,signal])
+fullSignal=np.concatenate([noise2,midSignal])
+plt.plot(fullSignal)
+plt.show()
+sync=sync(fullSignal)
 plt.plot(sync)
 plt.show()
-#receiveAndFFT(2)
+peaks=findPeaks(sync,1)
+print(peaks)
