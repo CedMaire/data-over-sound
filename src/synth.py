@@ -35,19 +35,15 @@ def sendBitArray(array, time=lib.TIME_BY_CHUNK):
     print("Sending at frequencie(s) (also sending at f+1000) : ")
     for f in freqs:
         signal = signal + np.sin(2*np.pi*t*f/lib.FS)  # 1st noise
-    #    signal = signal + np.sin(2*np.pi*t*(1000+f)/lib.FS)  # 2nd noise
+        signal = signal + np.sin(2*np.pi*t*(1000+f)/lib.FS)  # 2nd noise
         print(f)
-    #sd.play(signal, fs)
-    #
     return signal
-#/TEST
-    #sd.wait()
 
 #time : in seconds
 def receive(time=2*lib.TIME_BY_CHUNK):
     sd.default.channels=1
     record=sd.rec(time*lib.FS,lib.FS,blocking=True)
-    return record
+    return record[:,0]
 
 #Synchronise the record, return the sub-array of record starting at the end of
 #the white noise with the length TOTAL_ELEM_NUMBER
@@ -58,6 +54,10 @@ def sync(record):
     index=0
     for i in range (record.size - noiseLength):
         dot=np.dot(noise,record[i:noiseLength+i])
+        dotarray[i]=dot
+        if (dot>40): print(i,dot)
+        if (dot< -40): print(i,dot)
+
         if (dot>maxdot):
             maxdot=dot
             index=i
@@ -68,13 +68,7 @@ def sync(record):
 
 def findPeaks(signal, ones,frequence=lib.FS):
     w = np.fft.fft(signal)
-    plt.show()
     f = np.fft.fftfreq(len(w),d=1/frequence)
-    plt.plot(f, np.abs(w))
-    plt.show()
-    #print(f)
-    #print(f.min(), f.max())
-
     peaks = np.empty(2*ones)
     i = 0
     for x in range(2*ones):
@@ -105,12 +99,14 @@ sd.play(fullSignal)
 sd.wait()
 '''
 
-'''
 #Local test
+'''
 noise=createWhiteNoise()
 noise2=createWhiteNoise(lib.NOISE_TIME,3)
+noise3=createWhiteNoise(lib.TIME_BY_CHUNK,1)
 a = [1]
 signal=sendBitArray(a)
+signal+=noise3
 midSignal=np.concatenate([noise,signal])
 fullSignal=np.concatenate([noise2,midSignal])
 plt.plot(fullSignal)
@@ -121,9 +117,12 @@ plt.show()
 peaks=findPeaks(sync,1)
 print(peaks)
 '''
-#Receiving
 
+#Receiving
+'''
 rec=receive()
+print(rec.shape)
+#np.save("sync",rec)
 plt.plot(rec)
 plt.show()
 sync=sync(rec)
@@ -132,3 +131,17 @@ plt.plot(sync)
 plt.show()
 peaks=findPeaks(sync,10)
 print(peaks)
+'''
+
+#tests with sync.numpy
+
+rec=np.load("rec.npy")[:,0]
+sinus=np.load("sinus1500.npy")
+sinus=sinus[0:lib.FS]
+plt.plot(rec)
+plt.show()
+sync=sync(rec)
+plt.plot(sync)
+plt.plot(sinus)
+plt.show()
+findPeaks(sync,10)
