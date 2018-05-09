@@ -44,7 +44,7 @@ def sendBitArray(array, time=lib.TIME_BY_CHUNK):
     #sd.wait()
 
 #time : in seconds
-def receive(time=2*lib.TOTAL_ELEM_NUMBER):
+def receive(time=2*lib.TIME_BY_CHUNK):
     sd.default.channels=1
     record=sd.rec(time*lib.FS,lib.FS,blocking=True)
     return record
@@ -63,12 +63,15 @@ def sync(record):
             index=i
         i+=1
     begin=index+lib.NOISE_TIME*lib.FS
-    end = begin+lib.TOTAL_ELEM_NUMBER
+    end = begin+lib.FS ###CHANGE TO TOTAL TIME
     return record[begin:end]
 
 def findPeaks(signal, ones,frequence=lib.FS):
     w = np.fft.fft(signal)
-    f = np.fft.fftfreq(len(w))
+    plt.show()
+    f = np.fft.fftfreq(len(w),d=1/frequence)
+    plt.plot(f, np.abs(w))
+    plt.show()
     #print(f)
     #print(f.min(), f.max())
 
@@ -76,21 +79,21 @@ def findPeaks(signal, ones,frequence=lib.FS):
     i = 0
     for x in range(2*ones):
         idx = np.argmax(np.abs(w))
-        freq = f[idx]
-        freq_in_hertz = abs(freq * lib.FS)
+        freq_in_hertz = f[idx]
         peaks[i]=freq_in_hertz
 
         w = np.delete(w, idx)
-        idx = np.argmax(np.abs(w))
-        w = np.delete(w, idx)
+        #idx = np.argmax(np.abs(w))
+        #w = np.delete(w, idx)
         i+=1
     peaks=np.sort(peaks)
     return peaks
 
 
 
-
 #TEST
+
+#Sending
 '''
 noise=createWhiteNoise(lib.NOISE_TIME)
 a = [1]
@@ -101,8 +104,9 @@ plt.show()
 sd.play(fullSignal)
 sd.wait()
 '''
-#receiveAndFFT(2)
 
+'''
+#Local test
 noise=createWhiteNoise()
 noise2=createWhiteNoise(lib.NOISE_TIME,3)
 a = [1]
@@ -115,4 +119,16 @@ sync=sync(fullSignal)
 plt.plot(sync)
 plt.show()
 peaks=findPeaks(sync,1)
+print(peaks)
+'''
+#Receiving
+
+rec=receive()
+plt.plot(rec)
+plt.show()
+sync=sync(rec)
+#np.save("sync",sync)
+plt.plot(sync)
+plt.show()
+peaks=findPeaks(sync,10)
 print(peaks)
