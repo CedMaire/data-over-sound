@@ -5,14 +5,12 @@ import numpy as np
 import sounddevice as sd
 import matplotlib.pyplot as plt
 import lib as lib
-import scipy
-from scipy import signal
 
 
 # Create a white noise with a N(0,1), with the seed 42
-def createWhiteNoise(time=lib.NOISE_TIME):
+def createWhiteNoise(time=lib.NOISE_TIME, seed=42):
     sample = lib.FS*time
-    np.random.seed(42)
+    np.random.seed(seed)
     noise = np.random.normal(0, 1, sample)
     return noise
 
@@ -37,19 +35,15 @@ def sendBitArray(array, time=lib.TIME_BY_CHUNK):
         signal = signal + np.sin(2*np.pi*t*f/lib.FS)  # 1st noise
         signal = signal + np.sin(2*np.pi*t*(1000+f)/lib.FS)  # 2nd noise
         print(f)
-    # sd.play(signal, fs)
-    #
     return signal
-# /TEST
-    # sd.wait()
 
 # time : in seconds
 
 
-def receive(time=2*lib.TOTAL_ELEM_NUMBER):
+def receive(time=2*lib.TIME_BY_CHUNK):
     sd.default.channels = 1
     record = sd.rec(time*lib.FS, lib.FS, blocking=True)
-    return record
+    return record[:, 0]
 
 # Synchronise the record, return the sub-array of record starting at the end of
 # the white noise with the length TOTAL_ELEM_NUMBER
@@ -67,18 +61,16 @@ def sync(record):
             index = i
         i += 1
     begin = index+lib.NOISE_TIME*lib.FS
-    end = begin+lib.TOTAL_ELEM_NUMBER
+    end = begin+lib.FS  # CHANGE TO TOTAL TIME
     return record[begin:end]
 
 
-def findPeaks(frequence, signal, ones):
+def findPeaks(signal, ones, frequence=lib.FS):
     w = np.fft.fft(signal)
+    plt.plot(np.abs(w))
+    plt.show()
+    #f = np.fft.fftfreq(len(w), d=1/frequence)
     f = np.fft.fftfreq(len(w))
-    # plt.plot(w)
-    # plt.show()
-    # print(f)
-    # print(f.min(), f.max())
-
     peaks = np.empty(2*ones)
     i = 0
     for _ in range(2*ones):
@@ -88,41 +80,63 @@ def findPeaks(frequence, signal, ones):
         peaks[i] = freq_in_hertz
 
         w = np.delete(w, idx)
-        #idx = np.argmax(np.abs(w))
-        #w = np.delete(w, idx)
+        idx = np.argmax(np.abs(w))
+        w = np.delete(w, idx)
         i += 1
     peaks = np.sort(peaks)
     return peaks
 
 
-
 # TEST
-rec = receive(2 * lib.TIME_BY_CHUNK)
 
-sync = sync(rec)
+# Sending
+'''
+noise = createWhiteNoise(lib.NOISE_TIME)
+a = [1]
+signal = sendBitArray(a)
+fullSignal = np.concatenate([noise, signal])
+plt.plot(fullSignal)
+plt.show()
+sd.play(fullSignal)
+sd.wait()
+'''
+
+
+# Local test
+'''
+noise=createWhiteNoise()
+noise2=createWhiteNoise(lib.NOISE_TIME,3)
+noise3=createWhiteNoise(lib.TIME_BY_CHUNK,1)
+a = [1]
+signal=sendBitArray(a)
+signal+=noise3
+midSignal=np.concatenate([noise,signal])
+fullSignal=np.concatenate([noise2,midSignal])
+plt.plot(fullSignal)
+plt.show()
+sync=sync(fullSignal)
 plt.plot(sync)
 plt.show()
+peaks=findPeaks(sync,1)
+print(peaks)
+'''
 
-b, a = signal.butter(
-    1, [1000 / (0.5 * lib.FS), 3000 / (0.5 * lib.FS)], "bandpass")
-bandpassed = signal.filtfilt(b, a, sync)
-
-plt.plot(bandpassed)
-plt.show()
-
-peaks = findPeaks(lib.FS, bandpassed, 10)
+# Receiving
+rec = receive()
+sync = sync(rec)
+peaks = findPeaks(sync, 4)
 print(peaks)
 
+# tests with sync.numpy
 '''
-noise=createWhiteNoise(lib.NOISE_TIME)
-a = [0, 0, 1, 0, 0]
-signal=sendBitArray(a)
-print(noise.shape, signal.shape)
-sent=np.concatenate([noise,signal])
-plt.plot(sent)
+rec=np.load("rec.npy")[:,0]
+sinus=np.load("sinus1500.npy")
+sinus=sinus[0:lib.FS]
+plt.plot(rec)
 plt.show()
-sync=sync(sent)
+sync=sync(rec)
 plt.plot(sync)
+plt.plot(sinus)
 plt.show()
-receiveAndFFT(2)
+findPeaks(sync,10)
 '''
