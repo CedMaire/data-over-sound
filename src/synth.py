@@ -52,10 +52,8 @@ def sync(record):
     noiseLength=lib.FS*lib.NOISE_TIME
     maxdot=0
     index=0
-    for i in range (record.size - noiseLength):
+    for i in range (record.size - lib.TIME_BY_CHUNK*lib.FS - noiseLength): ### CHANGE TO TOTAL_ELEM_NUMBER
         dot=np.dot(noise,record[i:noiseLength+i])
-        if (dot>40): print(i,dot)
-        if (dot< -40): print(i,dot)
         if (dot>maxdot):
             maxdot=dot
             index=i
@@ -66,17 +64,17 @@ def sync(record):
 
 def findPeaks(signal, ones,frequence=lib.FS):
     w = np.fft.fft(signal)
-    f = np.fft.fftfreq(len(w),d=1/frequence)
+    f = np.fft.fftfreq(len(w))
     peaks = np.empty(2*ones)
     i = 0
     for x in range(2*ones):
         idx = np.argmax(np.abs(w))
-        freq_in_hertz = f[idx]
+        freq = f[idx]
+        freq_in_hertz = abs(freq * frequence)
         peaks[i]=freq_in_hertz
-
         w = np.delete(w, idx)
-        #idx = np.argmax(np.abs(w))
-        #w = np.delete(w, idx)
+        idx = np.argmax(np.abs(w))
+        w = np.delete(w, idx)
         i+=1
     peaks=np.sort(peaks)
     return peaks
@@ -86,19 +84,19 @@ def findPeaks(signal, ones,frequence=lib.FS):
 #TEST
 
 #Sending
-
+'''
 noise=createWhiteNoise(lib.NOISE_TIME)
-a = [1]
+a = [1,1]
 signal=sendBitArray(a)
 fullSignal=np.concatenate([noise,signal])
 plt.plot(fullSignal)
 plt.show()
 sd.play(fullSignal)
 sd.wait()
-
+'''
 
 #Local test
-'''
+
 noise=createWhiteNoise()
 noise2=createWhiteNoise(lib.NOISE_TIME,3)
 noise3=createWhiteNoise(lib.TIME_BY_CHUNK,1)
@@ -114,15 +112,13 @@ plt.plot(sync)
 plt.show()
 peaks=findPeaks(sync,1)
 print(peaks)
-'''
+
 
 #Receiving
 '''
 rec=receive()
 print(rec.shape)
 #np.save("sync",rec)
-plt.plot(rec)
-plt.show()
 sync=sync(rec)
 #np.save("sync",sync)
 plt.plot(sync)
