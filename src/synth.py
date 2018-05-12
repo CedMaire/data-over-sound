@@ -7,7 +7,26 @@ import matplotlib.pyplot as plt
 import lib as lib
 import noise as noise
 
+NONOISE=-1 #=1 if no noise between 1000,2000, 2 if no noise in 2000,3000
 
+#Detect the noise type
+def detectNoise():
+    sd.default.channels=1
+    record=sd.rec(lib.FS,lib.FS,blocking=True)[:,0]#during 1s for now, can be reduced
+    sd.wait()
+
+    #record=np.load("NONOISE2.npy") --debug
+    recordfft=np.fft.fft(record)
+    f=np.fft.fftfreq(len(record),1/lib.FS)# OK ÇA SERT A QUOI ?
+    sum1000=np.sum(np.abs(recordfft[1000:2000]))
+    sum2000=np.sum(np.abs(recordfft[2000:3000]))
+    print(sum1000,sum2000)
+    if (sum1000>sum2000):
+        NONOISE=2
+    else: NONOISE=1
+    print("NONOISE IN : ", NONOISE)
+    plt.plot(np.abs(recordfft))
+    plt.show()
 
 
 #Create a white noise with a N(0,1), with the seed 42
@@ -42,7 +61,7 @@ def sendVector(vector, time=lib.TIME_BY_CHUNK):
     signal = np.zeros(t.shape)
     print("Sending at frequencie(s): ")
     for f in freqs:
-        signal = signal + np.sin(2*np.pi*t*f/lib.FS)  # 1st noise
+        signal = signal + np.sin(2*np.pi*t*f/lib.FS)         # 1st noise
         signal = signal + np.sin(2*np.pi*t*(1000+f)/lib.FS)  # 2nd noise
         print(f,f+1000)
     return signal
@@ -50,27 +69,34 @@ def sendVector(vector, time=lib.TIME_BY_CHUNK):
 #Send vector in in basis 1=>1, 0=>-1, Basicly the same as sendVector
 # but send -sin when 0 instead of 0
 def sendVectorInBases(vector, time=lib.TIME_BY_CHUNK):
+    try:
+        if(NONOISE==-1):
+            raise ValueError("NONOISE still 1")
+    except ValueError:
+        print("You must run detectNoise before")
     k = lib.CHUNK_SIZE
     freqs = []
     # calculate the frequencies
     step = 1000/(k+1)
-    for i in range(0, k):
-        if(vector[i] == 1):
-            freqs.append(1000+step*(i+1))
-        else:
-            freqs.append(-(1000+step*(i+1)))
+    if (NONOISE==1):
+        for i in range(0, k):
+            if(vector[i] == 1):
+                freqs.append(1000+step*(i+1))
+            else:
+                freqs.append(-(1000+step*(i+1)))
+    else :
+        for i in range(0, k):
+            if(vector[i] == 1):
+                freqs.append(2000+step*(i+1))
+            else:
+                freqs.append(-(2000+step*(i+1)))
     # prepare the sinuses
     t = np.arange(time*lib.FS)
     signal = np.zeros(t.shape)
     print("Sending at frequencie(s) : ")
     for f in freqs:
         signal = signal + np.sin(2*np.pi*t*f/lib.FS)  # 1st noise
-        if (f>0):
-            signal = signal + np.sin(2*np.pi*t*(1000+f)/lib.FS)  # 2nd noise
-            print(f,f+1000)
-        else :
-            signal = signal + np.sin(2*np.pi*t*(-1000+f)/lib.FS)  # 2nd noise
-            print(f,f-1000)
+        print(f)
     return signal
 
 
@@ -118,20 +144,23 @@ def findPeaks(signal, ones,frequence=lib.FS):
 
 #Make the dot product with the basis to detect the codeword
 def projectOnBasis(signal):
+    try:
+        if(NONOISE==-1):
+            raise ValueError("NONOISE still 1")
+    except ValueError:
+        print("You must run detectNoise before")
     #calculate the basis
     k = lib.CHUNK_SIZE
     freqs = []
     step = 1000/(k+1)
     t = np.arange(lib.TIME_BY_CHUNK*lib.FS)
-    print(len(t))
-    sinus= np.zeros([lib.CHUNK_SIZE*2,len(t)])
+    sinus= np.zeros([lib.CHUNK_SIZE,len(t)])
     for i in range(0, k):
-        print(i)
-        f=1000+step*(i+1)
-        sinus[2*i,:]=np.sin(2*np.pi*t*f/lib.FS)
-        sinus[2*i+1,:]=np.sin(2*np.pi*t*(1000+f)/lib.FS)
-        print(f,1000+f)
-        i=i+1
+        if (NONOISE==1):
+            f=1000+step*(i+1)
+        else :
+            f=2000+step*(i+1)
+        sinus[i,:]=np.sin(2*np.pi*t*f/lib.FS)
     #Make the projection
     i=0
     for s in sinus:
@@ -143,24 +172,28 @@ def projectOnBasis(signal):
 #TEST
 
 #Sending
-'''
-noise=createWhiteNoise(lib.NOISE_TIME)
-a = [1,1]
-signal=sendBitArray(a)
-fullSignal=np.concatenate([noise,signal])
+"""
+noise1=createWhiteNoise(lib.NOISE_TIME)
+a = [[0,0]]
+signal=sendArrayVector(a)
+fullSignal=np.concatenate([noise1,signal])
+#noise3=noise.band_limited_noise(1000,2000,lib.FS*(lib.TIME_BY_CHUNK+lib.NOISE_TIME),lib.FS)*0
+#fullSignal=fullSignal+noise
 plt.plot(fullSignal)
 plt.show()
 sd.play(fullSignal)
 sd.wait()
-'''
+"""
 
 #Local test
-
+"""
 noise1=createWhiteNoise()
 noise2=createWhiteNoise(lib.NOISE_TIME,3)
-noise3=noise.band_limited_noise(1000,2000,lib.FS*lib.TIME_BY_CHUNK,lib.FS)*1000000
+noise3=noise.band_limited_noise(1000,2000,lib.FS*lib.TIME_BY_CHUNK,lib.FS)*100000
+NONOISE=2
 a = [[1,1]]
 signal=sendArrayVector(a)
+signal=signal+noise3
 plt.plot(signal)
 plt.show()
 signal+=noise3
@@ -173,13 +206,13 @@ sync=sync(fullSignal)
 #plt.show()
 #peaks=findPeaks(sync,1)
 projectOnBasis(signal)
-
-
+"""
+detectNoise()
 #Receiving
 '''
 rec=receive()
 print(rec.shape)
-#np.save("sync",rec)
+#np.save("rec",rec)
 sync=sync(rec)
 #np.save("sync",sync)
 plt.plot(sync)

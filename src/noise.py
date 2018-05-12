@@ -1,4 +1,6 @@
 import numpy as np
+import lib as lib
+import sounddevice as sd
 from scipy.io import wavfile
 
 freqs_stable = [2000,3000]
@@ -25,6 +27,7 @@ def band_limited_noise(min_freq, max_freq, samples=1024, samplerate=1):
     f[idx] = 1
     return fftnoise(f)
 
-x = band_limited_noise(freqs_stable[0], freqs_stable[1], fs*duration, fs)*100
-x = np.int16(x * (2**15 - 1))
-wavfile.write("noise[" + str(freqs_stable[0]) + "," + str(freqs_stable[1]) + "].wav", fs, x)
+#*3 to have way longer noise
+noise1=band_limited_noise(1000,2000,lib.FS*(lib.TIME_BY_CHUNK+lib.NOISE_TIME)*3,lib.FS)*100
+#sd.play(noise1)
+sd.wait()
