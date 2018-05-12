@@ -108,7 +108,7 @@ sd.wait()
 #noise=createWhiteNoise()
 #noise2=createWhiteNoise(lib.NOISE_TIME,3)
 #noise3=createWhiteNoise(lib.TIME_BY_CHUNK,1)
-a = [[1,0],[1,1]]
+a = [[1,0],[1,1],[0,1],[0,0]]
 signal=sendArrayVector(a)
 print(signal)
 plt.plot(signal)
