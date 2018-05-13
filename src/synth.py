@@ -186,11 +186,14 @@ sd.wait()
 """
 
 #Local test
-"""
+
 noise1=createWhiteNoise()
 noise2=createWhiteNoise(lib.NOISE_TIME,3)
-noise3=noise.band_limited_noise(1000,2000,lib.FS*lib.TIME_BY_CHUNK,lib.FS)*100000
 NONOISE=2
+if(NONOISE==2):
+    noise3=noise.band_limited_noise(2000,3000,lib.FS*lib.TIME_BY_CHUNK,lib.FS)*100000
+else:
+    noise3=noise.band_limited_noise(1000,2000,lib.FS*lib.TIME_BY_CHUNK,lib.FS)*100000
 a = [[1,1]]
 signal=sendArrayVector(a)
 signal=signal+noise3
@@ -206,9 +209,11 @@ sync=sync(fullSignal)
 #plt.show()
 #peaks=findPeaks(sync,1)
 projectOnBasis(signal)
+
 """
 detectNoise()
 #Receiving
+"""
 '''
 rec=receive()
 print(rec.shape)
