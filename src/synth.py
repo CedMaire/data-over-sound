@@ -183,10 +183,12 @@ def projectOnBasis(signal):
         plt.plot(s)
         plt.show()
         dot = np.dot(s, signal)
-        resultArray.append(dot)
+        resultArray.append(1 if (dot >= 0) else 0)
         print(i, dot)
         i = i + 1
 
+    print("Result Array:")
+    print(resultArray)
     return resultArray
 
 
@@ -200,6 +202,8 @@ def decodeSignal(signal):
         chunks[i] = projectOnBasis(chunk)
         i += 1
 
+    print("Chunk Array:")
+    print(chunks)
     return chunks
 
 # TEST
@@ -219,18 +223,20 @@ sd.play(fullSignal)
 sd.wait()
 """
 
-#Local test
+# Local test
 
-noise1=createWhiteNoise()
-noise2=createWhiteNoise(lib.NOISE_TIME,3)
-NONOISE=2
-if(NONOISE==2):
-    noise3=noise.band_limited_noise(2000,3000,lib.FS*lib.TIME_BY_CHUNK,lib.FS)*100000
+noise1 = createWhiteNoise()
+noise2 = createWhiteNoise(lib.NOISE_TIME, 3)
+NONOISE = 2
+if(NONOISE == 2):
+    noise3 = noise.band_limited_noise(
+        2000, 3000, lib.FS*lib.TIME_BY_CHUNK, lib.FS)*100000
 else:
-    noise3=noise.band_limited_noise(1000,2000,lib.FS*lib.TIME_BY_CHUNK,lib.FS)*100000
-a = [[1,1]]
-signal=sendArrayVector(a)
-signal=signal+noise3
+    noise3 = noise.band_limited_noise(
+        1000, 2000, lib.FS*lib.TIME_BY_CHUNK, lib.FS)*100000
+a = [[1, 0]]
+signal = sendArrayVector(a)
+signal = signal+noise3
 plt.plot(signal)
 plt.show()
 signal += noise3
@@ -242,7 +248,7 @@ sync = sync(fullSignal)
 # plt.plot(sync)
 # plt.show()
 # peaks=findPeaks(sync,1)
-projectOnBasis(signal)
+decodeSignal(signal)
 
 """
 detectNoise()
