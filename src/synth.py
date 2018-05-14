@@ -24,11 +24,8 @@ def detectNoise():
     sum2000 = np.sum(np.abs(recordfft[2000:3000]))
     if (sum1000 > sum2000):
         return 2
-        print("NONOISE=2")
     else:
         return 1
-        print("NONOISE=1")
-    return NONOISE
 
 
 # Create a white noise with a N(0,1), with the seed 42
@@ -75,7 +72,7 @@ def sendVector(vector, time=lib.TIME_BY_CHUNK):
 # but send -sin when 0 instead of 0
 
 
-def sendVectorInBases(vector, time=lib.TIME_BY_CHUNK, nonoise):
+def sendVectorInBases(vector, nonoise, time=lib.TIME_BY_CHUNK):
     try:
         if(nonoise == -1):
             raise ValueError("nonoise still 1")
@@ -102,7 +99,7 @@ def sendVectorInBases(vector, time=lib.TIME_BY_CHUNK, nonoise):
     signal = np.zeros(t.shape)
     print("Sending at frequencie(s) : ")
     for f in freqs:
-        signal = signal + np.sin(2*np.pi*t*f/lib.FS)  # 1st noise
+        signal = signal + 10 * np.sin(2*np.pi*t*f/lib.FS)  # 1st noise
         print(f)
     return signal
 
@@ -123,7 +120,7 @@ def sync(record, length):
     maxdot = 0
     index = 0
     # CHANGE TO TOTAL_ELEM_NUMBER
-    for i in range(record.size - lib.TIME_BY_CHUNK*lib.FS * length - noiseLength):
+    for i in range(record.size - lib.TIME_BY_CHUNK*lib.FS * length):
         dot = np.dot(noise, record[i:noiseLength+i])
         if (dot > maxdot):
             maxdot = dot
@@ -204,22 +201,26 @@ def decodeSignal(signal, nonoise):
 # TEST
 
 
-
 # Sending
-detectNoise()
+'''
+nonoise = detectNoise()
+nonoise = 1
+print(nonoise)
 noise1 = createWhiteNoise(lib.NOISE_TIME)
 a = [[0, 1], [1, 1], [1, 0]]
-signal = sendArrayVector(a)
+signal = sendArrayVector(a, nonoise)
 fullSignal = np.concatenate([noise1, signal])
 sd.play(fullSignal)
 sd.wait()
+'''
+
 
 # Local test
-"""
+'''
 noise1 = createWhiteNoise()
 noise2 = createWhiteNoise(lib.NOISE_TIME, 3)
 
-a = [[1, 0], [1, 1], [0, 0]]
+a = [[0, 1], [1, 1], [1, 0]]
 length = len(a)
 
 NONOISE = 2
@@ -229,7 +230,7 @@ if(NONOISE == 2):
 else:
     noise3 = noise.band_limited_noise(
         1000, 2000, lib.FS*lib.TIME_BY_CHUNK * length, lib.FS)*100000
-signal = sendArrayVector(a)
+signal = sendArrayVector(a, NONOISE)
 signal = signal+noise3
 signal += noise3
 midSignal = np.concatenate([noise1, signal])
@@ -240,15 +241,16 @@ sync = sync(fullSignal, length)
 # plt.plot(sync)
 # plt.show()
 # peaks=findPeaks(sync,1)
-decodeSignal(signal)
-"""
+decodeSignal(signal, NONOISE)
+'''
 
 # Receiving
-
+'''
 nonoise = detectNoise()
 rec = receive()
 sync = sync(rec, 3)
 decodeSignal(sync, nonoise)
+'''
 
 
 # tests with sync.numpy
