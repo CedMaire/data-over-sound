@@ -19,9 +19,12 @@ def detectNoise():
     sd.wait()
     # record=np.load("NONOISE2.npy") --debug
     recordfft = np.fft.fft(record)
+    # plt.plot(np.abs(recordfft))
+    # plt.show()
     # f = np.fft.fftfreq(len(record), 1/lib.FS)  # OK ÇA SERT A QUOI ?
     sum1000 = np.sum(np.abs(recordfft[1000:2000]))
     sum2000 = np.sum(np.abs(recordfft[2000:3000]))
+    print(sum1000, sum2000)
     if (sum1000 > sum2000):
         return 2
     else:
@@ -30,7 +33,7 @@ def detectNoise():
 
 # Create a white noise with a N(0,1), with the seed 42
 def createWhiteNoise(time=lib.NOISE_TIME, seed=42):
-    sample = lib.FS*time
+    sample = int(lib.FS*time)
     np.random.seed(seed)
     noise = np.random.normal(0, 1, sample)
     return noise
@@ -105,9 +108,9 @@ def sendVectorInBases(vector, nonoise, time=lib.TIME_BY_CHUNK):
 
 
 # time : in seconds
-def receive(time=10*lib.TIME_BY_CHUNK + lib.NOISE_TIME):
+def receive(time=150*lib.TIME_BY_CHUNK + lib.NOISE_TIME):
     sd.default.channels = 1
-    record = sd.rec(time*lib.FS, lib.FS, blocking=True)
+    record = sd.rec(int(np.ceil(time*lib.FS)), lib.FS, blocking=True)
     return record[:, 0]
 
 # Synchronise the record, return the sub-array of record starting at the end of
@@ -117,12 +120,12 @@ def receive(time=10*lib.TIME_BY_CHUNK + lib.NOISE_TIME):
 def sync(record, length):
     print(len(record))
     noise = createWhiteNoise()
-    noiseLength = lib.FS*lib.NOISE_TIME
+    noiseLength = int(lib.FS*lib.NOISE_TIME)
     maxdot = 0
     index = 0
     # CHANGE TO TOTAL_ELEM_NUMBER
-    for i in range(record.size - (lib.TIME_BY_CHUNK * lib.FS * length + noiseLength)):
-        if(i % 1000 == 0):
+    for i in range(int(np.floor(record.size - (lib.TIME_BY_CHUNK * lib.FS * length + noiseLength)))):
+        if(i % 10000 == 0):
             print(i, '/', record.size - lib.TIME_BY_CHUNK *
                   lib.FS * length + noiseLength)
         dot = np.dot(noise, record[i:noiseLength+i])
@@ -130,10 +133,10 @@ def sync(record, length):
             maxdot = dot
             index = i
         i += 1
-    begin = index+lib.NOISE_TIME*lib.FS
+    begin = int(index+lib.NOISE_TIME*lib.FS)
     end = begin+lib.TIME_BY_CHUNK*lib.FS * length  # CHANGE TO TOTAL TIME
     print(begin, end)
-    return record[begin:end]
+    return record[begin:int(end)]
 
 
 def findPeaks(signal, ones, frequence=lib.FS):
@@ -190,8 +193,8 @@ def projectOnBasis(signal, nonoise):
 
 # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 def decodeSignal(signal, nonoise):
-    chunks = [signal[i:i + lib.ELEMENTS_PER_CHUNK]
-              for i in range(0, len(signal), lib.ELEMENTS_PER_CHUNK)]
+    chunks = [signal[i:int(i + lib.ELEMENTS_PER_CHUNK)]
+              for i in range(0, len(signal), int(lib.ELEMENTS_PER_CHUNK))]
 
     i = 0
     for chunk in chunks:
@@ -258,9 +261,9 @@ print(nonoise)
 print("Receive")
 rec = receive()
 print("Sync")
-sync = sync(rec, 3)
-plt.plot(sync)
-plt.show()
+sync = sync(rec, 32)
+# plt.plot(sync)
+# plt.show()
 print("Decode")
 decodeSignal(sync, nonoise)
 
