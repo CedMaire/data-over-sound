@@ -77,7 +77,7 @@ def sendVectorInBases(vector,nonoise,time=lib.TIME_BY_CHUNK,):
 
 
 # time : in seconds
-def receive(time=10*lib.TIME_BY_CHUNK+lib.NOISE_TIME):
+def receive(time=10*lib.TIME_BY_CHUNK + lib.NOISE_TIME):
     sd.default.channels = 1
     record = sd.rec(time*lib.FS, lib.FS, blocking=True)
     return record[:, 0]
@@ -86,12 +86,16 @@ def receive(time=10*lib.TIME_BY_CHUNK+lib.NOISE_TIME):
 # Synchronise the record, return the sub-array of record starting at the end of
 # the white noise with the length TOTAL_ELEM_NUMBER
 def sync(record, length):
+    print(len(record))
     noise = createWhiteNoise()
     noiseLength = int(lib.FS*lib.NOISE_TIME)
     maxdot = 0
     index = 0
     # CHANGE TO TOTAL_ELEM_NUMBER
-    for i in range(record.size - (lib.TIME_BY_CHUNK*lib.FS * length+noiseLength)):
+    for i in range(record.size - (lib.TIME_BY_CHUNK * lib.FS * length + noiseLength)):
+        if(i % 1000 == 0):
+            print(i, '/', record.size - lib.TIME_BY_CHUNK *
+                  lib.FS * length + noiseLength)
         dot = np.dot(noise, record[i:noiseLength+i])
         if (dot > maxdot):
             maxdot = dot
@@ -186,7 +190,8 @@ sync = sync(fullSignal, length)
 # plt.show()
 # peaks=findPeaks(sync,1)
 decodeSignal(signal,NONOISE)
-"""
+
+'''
 
 #Receiving
 """
