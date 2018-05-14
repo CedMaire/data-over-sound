@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import lib as lib
 import noise as noise
 
-NONOISE = -1  # =1 if no noise between 1000,2000, 2 if no noise in 2000,3000
+# NONOISE = -1  # =1 if no noise between 1000,2000, 2 if no noise in 2000,3000
 
 # Detect the noise type
 
@@ -198,25 +198,23 @@ def decodeSignal(signal):
     print(chunks)
     return chunks
 
+
 # TEST
 
 
+
 # Sending
-"""
-noise1=createWhiteNoise(lib.NOISE_TIME)
-a = [[0,0]]
-signal=sendArrayVector(a)
-fullSignal=np.concatenate([noise1,signal])
-# noise3=noise.band_limited_noise(1000,2000,lib.FS*(lib.TIME_BY_CHUNK+lib.NOISE_TIME),lib.FS)*0
-# fullSignal=fullSignal+noise
-plt.plot(fullSignal)
-plt.show()
+detectNoise()
+noise1 = createWhiteNoise(lib.NOISE_TIME)
+a = [[0, 1], [1, 1], [1, 0]]
+signal = sendArrayVector(a)
+fullSignal = np.concatenate([noise1, signal])
 sd.play(fullSignal)
 sd.wait()
-"""
+
 
 # Local test
-
+'''
 noise1 = createWhiteNoise()
 noise2 = createWhiteNoise(lib.NOISE_TIME, 3)
 
@@ -242,7 +240,7 @@ sync = sync(fullSignal, length)
 # plt.show()
 # peaks=findPeaks(sync,1)
 decodeSignal(signal)
-
+'''
 """
 detectNoise()
 #Receiving
