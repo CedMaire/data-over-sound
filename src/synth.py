@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import lib as lib
 import noise as noise
 
-NONOISE = -1  # =1 if no noise between 1000,2000, 2 if no noise in 2000,3000
+#NONOISE = -1  # =1 if no noise between 1000,2000, 2 if no noise in 2000,3000
 
 # Detect the noise type
 
@@ -17,17 +17,18 @@ def detectNoise():
     record = sd.rec(lib.FS, lib.FS, blocking=True)[
         :, 0]  # during 1s for now, can be reduced
     sd.wait()
-
     # record=np.load("NONOISE2.npy") --debug
     recordfft = np.fft.fft(record)
     # f = np.fft.fftfreq(len(record), 1/lib.FS)  # OK ÇA SERT A QUOI ?
     sum1000 = np.sum(np.abs(recordfft[1000:2000]))
     sum2000 = np.sum(np.abs(recordfft[2000:3000]))
-    print(sum1000, sum2000)
     if (sum1000 > sum2000):
-        NONOISE = 2
+        return 2
+        print("NONOISE=2")
     else:
-        NONOISE = 1
+        return 1
+        print("NONOISE=1")
+    return NONOISE
 
 
 # Create a white noise with a N(0,1), with the seed 42
@@ -38,11 +39,11 @@ def createWhiteNoise(time=lib.NOISE_TIME, seed=42):
     return noise
 
 
-def sendArrayVector(array):
+def sendArrayVector(array,nonoise):
     signal = np.zeros(0)
     for a in array:
         # inter=sendVector(a)
-        inter = sendVectorInBases(a)
+        inter = sendVectorInBases(a,nonoise)
         signal = np.concatenate([signal, inter])
     return signal
 
@@ -74,17 +75,17 @@ def sendVector(vector, time=lib.TIME_BY_CHUNK):
 # but send -sin when 0 instead of 0
 
 
-def sendVectorInBases(vector, time=lib.TIME_BY_CHUNK):
+def sendVectorInBases(vector, time=lib.TIME_BY_CHUNK,nonoise):
     try:
-        if(NONOISE == -1):
-            raise ValueError("NONOISE still 1")
+        if(nonoise == -1):
+            raise ValueError("nonoise still 1")
     except ValueError:
         print("You must run detectNoise before")
     k = lib.CHUNK_SIZE
     freqs = []
     # calculate the frequencies
     step = 1000/(k+1)
-    if (NONOISE == 1):
+    if (nonoise == 1):
         for i in range(0, k):
             if(vector[i] == 1):
                 freqs.append(1000+step*(i+1))
@@ -107,7 +108,7 @@ def sendVectorInBases(vector, time=lib.TIME_BY_CHUNK):
 
 
 # time : in seconds
-def receive(time=2*lib.TIME_BY_CHUNK):
+def receive(time=4*lib.TIME_BY_CHUNK):
     sd.default.channels = 1
     record = sd.rec(time*lib.FS, lib.FS, blocking=True)
     return record[:, 0]
@@ -153,10 +154,11 @@ def findPeaks(signal, ones, frequence=lib.FS):
 # Make the dot product with the basis to detect the codeword
 
 
-def projectOnBasis(signal):
+def projectOnBasis(signal,nonoise):
     try:
-        if(NONOISE == -1):
-            raise ValueError("NONOISE still 1")
+        print("",nonoise)
+        if(nonoise == -1):
+            raise ValueError("nonoise still 1")
     except ValueError:
         print("You must run detectNoise before")
     # calculate the basis
@@ -165,7 +167,7 @@ def projectOnBasis(signal):
     t = np.arange(lib.TIME_BY_CHUNK*lib.FS)
     sinus = np.zeros([lib.CHUNK_SIZE, len(t)])
     for i in range(0, k):
-        if (NONOISE == 1):
+        if (nonoise == 1):
             f = 1000+step*(i+1)
         else:
             f = 2000+step*(i+1)
@@ -185,13 +187,13 @@ def projectOnBasis(signal):
 
 
 # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
-def decodeSignal(signal):
+def decodeSignal(signal,nonoise):
     chunks = [signal[i:i + lib.ELEMENTS_PER_CHUNK]
               for i in range(0, len(signal), lib.ELEMENTS_PER_CHUNK)]
 
     i = 0
     for chunk in chunks:
-        chunks[i] = projectOnBasis(chunk)
+        chunks[i] = projectOnBasis(chunk,nonoise)
         i += 1
 
     print("Chunk Array:")
@@ -216,7 +218,7 @@ sd.wait()
 """
 
 # Local test
-
+"""
 noise1 = createWhiteNoise()
 noise2 = createWhiteNoise(lib.NOISE_TIME, 3)
 
@@ -242,22 +244,16 @@ sync = sync(fullSignal, length)
 # plt.show()
 # peaks=findPeaks(sync,1)
 decodeSignal(signal)
+"""
 
-"""
-detectNoise()
 #Receiving
-"""
-'''
+
+nonoise=detectNoise()
 rec=receive()
-print(rec.shape)
-# np.save("rec",rec)
-sync=sync(rec)
-# np.save("sync",sync)
-plt.plot(sync)
-plt.show()
-peaks=findPeaks(sync,10)
-print(peaks)
-'''
+sync=sync(rec,3)
+decodeSignal(sync,nonoise)
+
+
 
 # tests with sync.numpy
 '''
