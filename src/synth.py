@@ -105,7 +105,7 @@ def sendVectorInBases(vector, nonoise, time=lib.TIME_BY_CHUNK):
 
 
 # time : in seconds
-def receive(time=10*lib.TIME_BY_CHUNK):
+def receive(time=10*lib.TIME_BY_CHUNK + lib.NOISE_TIME):
     sd.default.channels = 1
     record = sd.rec(time*lib.FS, lib.FS, blocking=True)
     return record[:, 0]
@@ -115,12 +115,16 @@ def receive(time=10*lib.TIME_BY_CHUNK):
 
 
 def sync(record, length):
+    print(len(record))
     noise = createWhiteNoise()
     noiseLength = lib.FS*lib.NOISE_TIME
     maxdot = 0
     index = 0
     # CHANGE TO TOTAL_ELEM_NUMBER
-    for i in range(record.size - lib.TIME_BY_CHUNK*lib.FS * length):
+    for i in range(record.size - (lib.TIME_BY_CHUNK * lib.FS * length + noiseLength)):
+        if(i % 1000 == 0):
+            print(i, '/', record.size - lib.TIME_BY_CHUNK *
+                  lib.FS * length + noiseLength)
         dot = np.dot(noise, record[i:noiseLength+i])
         if (dot > maxdot):
             maxdot = dot
@@ -243,23 +247,26 @@ sync = sync(fullSignal, length)
 # plt.show()
 # peaks=findPeaks(sync,1)
 decodeSignal(signal,NONOISE)
-"""
+
+'''
 
 # Receiving
 
-nonoise=detectNoise()
-rec=receive()
-sync=sync(rec,3)
+print("Detect Noise")
+nonoise = detectNoise()
+print(nonoise)
+print("Receive")
+rec = receive()
+print("Sync")
+sync = sync(rec, 3)
 plt.plot(sync)
 plt.show()
-nonoise=1
-decodeSignal(sync,nonoise)
+print("Decode")
+decodeSignal(sync, nonoise)
 
 
-
+'''
 # tests with sync.numpy
-'''
-'''
 rec=np.load("rec.npy")[:,0]
 sinus=np.load("sinus1500.npy")
 sinus=sinus[0:lib.FS]
