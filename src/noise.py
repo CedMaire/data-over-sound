@@ -31,8 +31,8 @@ def band_limited_noise(min_freq, max_freq, samples=1024, samplerate=1):
 
 
 # *3 to have way longer noise
-noise1 = band_limited_noise(
-    2000, 3000, lib.FS * (lib.TIME_BY_CHUNK + lib.NOISE_TIME) * 3, lib.FS) * 100
-wavfile.write("noise_2k-3k.wav", lib.FS, noise1)
+#noise1 = band_limited_noise(
+#    1000, 2000, lib.FS * (lib.TIME_BY_CHUNK + lib.NOISE_TIME) * 3, lib.FS) * 500
+#wavfile.write("noise_2k-3k.wav", lib.FS, noise1)
 # sd.play(noise1)
 # sd.wait()
