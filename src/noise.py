@@ -1,38 +1,48 @@
-import numpy as np
-import lib as lib
-import sounddevice as sd
-from scipy.io import wavfile
-
-freqs_stable = [2000, 3000]
-
-duration = 5
-
-fs = 44100
-
-num_samples = fs*duration
+import numpy as Numpy
+import lib as Lib
+import sounddevice as SoundDevice
+from scipy.io import wavfile as WavFile
+import os as OS
 
 
-def fftnoise(f):
-    f = np.array(f, dtype='complex')
-    Np = (len(f) - 1) // 2
-    phases = np.random.rand(Np) * 2 * np.pi
-    phases = np.cos(phases) + 1j * np.sin(phases)
-    f[1:Np+1] *= phases
-    f[-1:-1-Np:-1] = np.conj(f[1:Np+1])
-    return np.fft.ifft(f).real
+class NoiseGenerator:
+    def __init__(self):
+        pass
+
+    def fftNoise(self, f):
+        f = Numpy.array(f, dtype="complex")
+        Np = int((len(f) - 1) / 2)
+
+        phases = Numpy.random.rand(Np) * 2 * Numpy.pi
+        phases = Numpy.cos(phases) + 1j * Numpy.sin(phases)
+
+        f[1:Np+1] *= phases
+        f[-1:-1 - Np:-1] = Numpy.conj(f[1:Np + 1])
+
+        return Numpy.fft.ifft(f).real
+
+    def generateBandLimitedNoise(self, min_freq, max_freq, samples=1024, samplerate=1):
+        freqs = Numpy.abs(Numpy.fft.fftfreq(samples, 1 / samplerate))
+        f = Numpy.zeros(samples)
+        idx = Numpy.where(Numpy.logical_or(
+            freqs < min_freq, freqs > max_freq))[0]
+        f[idx] = 1
+
+        return self.fftNoise(f)
 
 
-def band_limited_noise(min_freq, max_freq, samples=1024, samplerate=1):
-    freqs = np.abs(np.fft.fftfreq(samples, 1/samplerate))
-    f = np.zeros(samples)
-    idx = np.where(np.logical_or(freqs < min_freq, freqs > max_freq))[0]
-    f[idx] = 1
-    return fftnoise(f)
+if __name__ == '__main__':
+    dirname, _ = OS.path.split(OS.path.abspath(__file__))
+    dirname += "/../sound/"
 
+    noise1 = NoiseGenerator().generateBandLimitedNoise(
+        Lib.FREE_FREQ_MIN,
+        Lib.FREE_FREQ_MAX,
+        int(Lib.SAMPLES_PER_SEC * (Lib.TIME_PER_CHUNK + Lib.NOISE_TIME) * 30),
+        Lib.SAMPLES_PER_SEC) * Lib.NOISE_AMPLIFIER
 
-# *3 to have way longer noise
-# noise1 = band_limited_noise(
-#    2000, 3000, lib.FS * (lib.TIME_BY_CHUNK + lib.NOISE_TIME) * 3, lib.FS) * 100
-# wavfile.write("noise_2k-3k.wav", lib.FS, noise1)
-# sd.play(noise1)
-# sd.wait()
+    WavFile.write(dirname + "noise_" + repr(Lib.FREE_FREQ_MIN) + "-" +
+                  repr(Lib.FREE_FREQ_MAX) + ".wav", Lib.SAMPLES_PER_SEC, noise1)
+
+    # SoundDevice.play(noise1)
+    # SoundDevice.wait()

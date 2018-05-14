@@ -1,7 +1,7 @@
 import unireedsolomon as ReedSalomon
 import lib as Lib
 import mpmath as BigNumbers
-import numpy as np
+import numpy as Numpy
 
 
 class Coder:
@@ -147,6 +147,6 @@ class Coder:
 
     # Creates a random array using a seed.
     def createRandomArray(self, array_size, seed, max_value):
-        np.random.seed(seed)
-        tmp = np.random.randint(max_value, size=(array_size))
+        Numpy.random.seed(seed)
+        tmp = Numpy.random.randint(max_value, size=(array_size))
         return tmp

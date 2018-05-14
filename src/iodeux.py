@@ -1,5 +1,5 @@
 import lib as Lib
-import numpy as np
+import numpy as Numpy
 
 
 class IODeux:
