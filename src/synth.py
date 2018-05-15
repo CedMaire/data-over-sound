@@ -42,7 +42,8 @@ def createWhiteNoise(time=lib.NOISE_TIME, seed=42):
 def sendArrayVector(array, nonoise):
     signal = np.zeros(0)
     for a in array:
-        inter = sendVectorInBases(a, nonoise)
+        #inter = sendVectorInBases(a, nonoise)
+        inter=pseudoQAM(a,nonoise)
         signal = np.concatenate([signal, inter])
     return signal
 
@@ -73,6 +74,29 @@ def sendVectorInBases(vector, nonoise, time=lib.TIME_BY_CHUNK,):
     for f in freqs:
         signal = signal + 10*np.sin(2*np.pi*t*f/lib.FS)  # 1st noise
         print(f)
+    return signal
+
+#(0,0)=-cos-sin, (0,1)=-cos+sin, (1,0)=cos-sin, (1,1)=cos+sin
+def pseudoQAM(vector, nonoise, time=lib.TIME_BY_CHUNK):
+    print(vector)
+    t = np.arange(time*lib.FS)
+    signal = np.zeros(t.shape)
+    f=1500
+    if (nonoise==2):
+        f=f+1000
+    if (vector[0]==1):
+        print("1")
+        signal=signal + np.cos(2*np.pi*t*f/lib.FS)
+    else:
+        print("2")
+        signal=signal -np.cos(2*np.pi*t*f/lib.FS)
+    if (vector[1]==1):
+        print("3")
+        signal=signal + np.sin(2*np.pi*t*f/lib.FS)
+    else:
+        print("4")
+        signal=signal -np.sin(2*np.pi*t*f/lib.FS)
+
     return signal
 
 
@@ -133,6 +157,21 @@ def projectOnBasis(signal, nonoise):
     print(resultArray)
     return resultArray
 
+def decodeQAM(signal, nonoise):
+    result= []
+    t = np.arange(lib.TIME_BY_CHUNK*lib.FS)
+    sinus = np.zeros(t.shape)
+    cosinus= np.zeros(t.shape)
+    f=1500 if nonoise==1 else 2500
+    sinus= sinus+np.sin(2*np.pi*t*f/lib.FS)
+    cosinus= cosinus+np.cos(2*np.pi*t*f/lib.FS)
+    dot1st=np.dot(signal,cosinus)
+    dot2nd=np.dot(signal,sinus)
+    print(dot1st,dot2nd)
+    result.append(1 if dot1st>0 else 0)
+    result.append(1 if dot2nd>0 else 0)
+    return result
+
 
 # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
 def decodeSignal(signal, nonoise):
@@ -142,11 +181,13 @@ def decodeSignal(signal, nonoise):
     i = 0
     for chunk in chunks:
         print(len(chunk))
-        chunks[i] = projectOnBasis(chunk, nonoise)
+        #chunks[i] = projectOnBasis(chunk, nonoise)
+        chunks[i]= decodeQAM(chunk,nonoise)
         i += 1
     print("Chunk Array:")
     print(chunks)
     return chunks
+
 
 
 
@@ -165,34 +206,33 @@ sd.wait()
 
 
 # Local test
-"""
+
 noise1 = createWhiteNoise()
 noise2 = createWhiteNoise(lib.NOISE_TIME, 3)
 
-a = [[1, 0], [1, 1], [0, 0]]
+a = [[1, 1],[1,0],[0,0],[1,0],[1,1]]
 length = len(a)
 
 NONOISE = 2
-if(NONOISE == 2):
+"""if(NONOISE == 2):
     noise3 = noise.band_limited_noise(
-        2000, 3000, lib.FS*lib.TIME_BY_CHUNK * length, lib.FS)*100000
+        2000, 3000, lib.FS*lib.TIME_BY_CHUNK * length, lib.FS)*100
 else:
     noise3 = noise.band_limited_noise(
-        1000, 2000, lib.FS*lib.TIME_BY_CHUNK * length, lib.FS)*100000
+        1000, 2000, lib.FS*lib.TIME_BY_CHUNK * length, lib.FS)*100
+"""
 signal = sendArrayVector(a,NONOISE)
-signal = signal+noise3
-signal += noise3
+#signal = signal+noise3
 midSignal = np.concatenate([noise1, signal])
 fullSignal = np.concatenate([noise2, midSignal])
-# plt.plot(fullSignal)
-# plt.show()
+plt.plot(fullSignal)
+plt.show()
 sync = sync(fullSignal, length)
-# plt.plot(sync)
-# plt.show()
+plt.plot(sync)
+plt.show()
 # peaks=findPeaks(sync,1)
 decodeSignal(signal,NONOISE)
 
-"""
 
 
 # Receiving
