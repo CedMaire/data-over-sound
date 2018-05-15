@@ -1,10 +1,14 @@
 import iodeux as IODeux
 import lib as Lib
 import coder as Coder
+import synth as Synthesizer
+import sounddevice as SoundDevice
+import numpy as Numpy
 
 if __name__ == "__main__":
     io = IODeux.IODeux()
     coder = Coder.Coder()
+    synthesizer = Synthesizer.Synthesizer()
 
     stringRead = io.readFile(Lib.FILENAME_READ)
 
@@ -12,28 +16,11 @@ if __name__ == "__main__":
     print("ENCODED VECTORS:")
     print(encodedVectors)
 
-    decodedTuple = coder.decode(encodedVectors)
-    decodedString = decodedTuple[1]
-    print("DECODED STRING:")
-    print(decodedString)
+    noNoise = synthesizer.detectNoise()
+    synchNoise = synthesizer.createWhiteNoise()
 
-    if (decodedTuple[0]):
-        io.writeFile(Lib.FILENAME_WRITE, decodedString)
+    signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
+    signalToSend = Numpy.concatenate([synchNoise, signalToSend])
 
-        print("Same string? - " + repr(stringRead == decodedString))
-    else:
-        print(decodedTuple[1])
-
-    # ###################################################################
-    # Sending
-    # ###################################################################
-    '''
-    nonoise = detectNoise()
-    Noise1 = createWhiteNoise(Lib.Noise_TIME)
-    a = [[0], [1], [1], [0], [0], [1], [0], [0], [0], [1], [1], [0], [0], [1], [0], [0],
-         [0], [1], [1], [0], [0], [1], [0], [0], [0], [1], [1], [0], [0], [1], [0], [0]]
-    signal = generateCompleteSignal(a, nonoise)
-    fullSignal = Numpy.concatenate([Noise1, signal])
-    SoundDevice.play(fullSignal)
+    SoundDevice.play(signalToSend)
     SoundDevice.wait()
-    '''

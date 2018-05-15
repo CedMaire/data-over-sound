@@ -22,8 +22,8 @@ class NoiseGenerator:
         return Numpy.fft.ifft(f).real
 
     def generateBandLimitedNoise(self, min_freq, max_freq, samples=1024, samplerate=1):
-        freqs = Numpy.abs(Numpy.fft.fftfreq(samples, 1 / samplerate))
-        f = Numpy.zeros(samples)
+        freqs = Numpy.abs(Numpy.fft.fftfreq(int(samples), 1 / samplerate))
+        f = Numpy.zeros(int(samples))
         idx = Numpy.where(Numpy.logical_or(
             freqs < min_freq, freqs > max_freq))[0]
         f[idx] = 1

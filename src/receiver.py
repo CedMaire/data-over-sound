@@ -1,16 +1,17 @@
 import iodeux as IODeux
 import lib as Lib
 import coder as Coder
+import synth as Synthesizer
 
 if __name__ == "__main__":
     io = IODeux.IODeux()
     coder = Coder.Coder()
+    synthesizer = Synthesizer.Synthesizer()
 
-    stringRead = io.readFile(Lib.FILENAME_READ)
-
-    encodedVectors = coder.encode(stringRead)
-    print("ENCODED VECTORS:")
-    print(encodedVectors)
+    noNoise = synthesizer.detectNoise()
+    recording = synthesizer.recordSignal()
+    dataSignal = synthesizer.extractDataSignal(recording)
+    encodedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
 
     decodedTuple = coder.decode(encodedVectors)
     decodedString = decodedTuple[1]
@@ -19,24 +20,7 @@ if __name__ == "__main__":
 
     if (decodedTuple[0]):
         io.writeFile(Lib.FILENAME_WRITE, decodedString)
-
-        print("Same string? - " + repr(stringRead == decodedString))
+        print("Done!")
     else:
+        # Try to flip the bits?
         print(decodedTuple[1])
-
-    # ###################################################################
-    # Receiving
-    # ###################################################################
-    '''
-    print("Detect Noise")
-    nonoise = detectNoise()
-    print(nonoise)
-    print("Receive")
-    rec = receive()
-    print("Sync")
-    sync = sync(rec, 32)
-    # Plot.plot(sync)
-    # Plot.show()
-    print("Decode")
-    decodeSignal(sync, nonoise)
-    '''

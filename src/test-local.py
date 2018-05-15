@@ -1,17 +1,64 @@
 import iodeux as IODeux
 import lib as Lib
 import coder as Coder
+import synth as Synthesizer
+import noisedeux as Noise
+import numpy as Numpy
 
 if __name__ == "__main__":
     io = IODeux.IODeux()
     coder = Coder.Coder()
+    synthesizer = Synthesizer.Synthesizer()
+    noise = Noise.NoiseGenerator()
 
     stringRead = io.readFile(Lib.FILENAME_READ)
+    print(len(stringRead))
 
+    # Encode
     encodedVectors = coder.encode(stringRead)
+    print(len(encodedVectors))
     print("ENCODED VECTORS:")
     print(encodedVectors)
 
+    # Generate Signal
+    noiseStart = synthesizer.createWhiteNoise()
+    noiseEnd = synthesizer.createWhiteNoise()
+
+    noNoise = 1  # CHANGE AS YOU WANT BETWEEN {1, 2}
+    noiseMiddle = None
+    if(noNoise == 2):
+        print(Lib.NEEDED_AMOUNT_OF_VECTORS)
+        print(Lib.SAMPLES_PER_SEC * Lib.TIME_PER_CHUNK *
+              Lib.NEEDED_AMOUNT_OF_VECTORS)
+        noiseMiddle = noise.generateBandLimitedNoise(
+            Lib.UPPER_LOW_FREQUENCY_BOUND,
+            Lib.UPPER_UPPER_FREQUENCY_BOUND,
+            Lib.SAMPLES_PER_SEC * Lib.TIME_PER_CHUNK * Lib.NEEDED_AMOUNT_OF_VECTORS,
+            Lib.SAMPLES_PER_SEC) * 100000
+    else:
+        print(Lib.NEEDED_AMOUNT_OF_VECTORS)
+        print(Lib.SAMPLES_PER_SEC * Lib.TIME_PER_CHUNK *
+              Lib.NEEDED_AMOUNT_OF_VECTORS)
+        noiseMiddle = noise.generateBandLimitedNoise(
+            Lib.LOWER_LOW_FREQUENCY_BOUND,
+            Lib.LOWER_UPPER_FREQUENCY_BOUND,
+            Lib.SAMPLES_PER_SEC * Lib.TIME_PER_CHUNK * Lib.NEEDED_AMOUNT_OF_VECTORS,
+            Lib.SAMPLES_PER_SEC) * 100000
+
+    signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
+
+    # Send
+    print(signalToSend.shape)
+    print(noiseMiddle.shape)
+    signalToSend += noiseMiddle
+    signalToSend = Numpy.concatenate(
+        [noiseStart, signalToSend, noiseEnd])
+
+    # Receive
+    dataSignal = synthesizer.extractDataSignal(signalToSend)
+    encodedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
+
+    # Decode
     decodedTuple = coder.decode(encodedVectors)
     decodedString = decodedTuple[1]
     print("DECODED STRING:")
@@ -23,32 +70,3 @@ if __name__ == "__main__":
         print("Same string? - " + repr(stringRead == decodedString))
     else:
         print(decodedTuple[1])
-
-    # ###################################################################
-    # Test Local
-    # ###################################################################
-    '''
-    synthesizer = Synthesizer.Synthesizer()
-
-    noise1 = synthesizer.createWhiteNoise()
-    noise2 = synthesizer.createWhiteNoise()
-
-    a = [[0], [1], [1], [0], [0], [1], [0], [0], [0], [1], [1], [0], [0], [1], [0], [0],
-         [0], [1], [1], [0], [0], [1], [0], [0], [0], [1], [1], [0], [0], [1], [0], [0]]
-    length = len(a)
-
-    nonoise = 2
-    if(nonoise == 2):
-        Noise3 = Noise.band_limited_Noise(
-            2000, 3000, Lib.FS*Lib.TIME_BY_CHUNK * length, Lib.FS)*100000
-    else:
-        Noise3 = Noise.band_limited_Noise(
-            1000, 2000, Lib.FS*Lib.TIME_BY_CHUNK * length, Lib.FS)*100000
-    signal = generateCompleteSignal(a, nonoise)
-    signal = signal+Noise3
-    signal += Noise3
-    midSignal = Numpy.concatenate([noise1, signal])
-    fullSignal = Numpy.concatenate([noise2, midSignal])
-    sync = sync(fullSignal, length)
-    decodeSignal(signal, nonoise)
-    '''
