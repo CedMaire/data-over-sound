@@ -4,6 +4,7 @@ import coder as Coder
 import synth as Synthesizer
 import noisedeux as Noise
 import numpy as Numpy
+import matplotlib.pyplot as Plot
 
 if __name__ == "__main__":
     io = IODeux.IODeux()
@@ -12,11 +13,9 @@ if __name__ == "__main__":
     noise = Noise.NoiseGenerator()
 
     stringRead = io.readFile(Lib.FILENAME_READ)
-    print(len(stringRead))
 
     # Encode
     encodedVectors = coder.encode(stringRead)
-    print(len(encodedVectors))
     print("ENCODED VECTORS:")
     print(encodedVectors)
 
@@ -27,39 +26,32 @@ if __name__ == "__main__":
     noNoise = 1  # CHANGE AS YOU WANT BETWEEN {1, 2}
     noiseMiddle = None
     if(noNoise == 2):
-        print(Lib.NEEDED_AMOUNT_OF_VECTORS)
-        print(Lib.SAMPLES_PER_SEC * Lib.TIME_PER_CHUNK *
-              Lib.NEEDED_AMOUNT_OF_VECTORS)
         noiseMiddle = noise.generateBandLimitedNoise(
             Lib.UPPER_LOW_FREQUENCY_BOUND,
             Lib.UPPER_UPPER_FREQUENCY_BOUND,
             Lib.SAMPLES_PER_SEC * Lib.TIME_PER_CHUNK * Lib.NEEDED_AMOUNT_OF_VECTORS,
-            Lib.SAMPLES_PER_SEC) * 100000
+            Lib.SAMPLES_PER_SEC) * 100
     else:
-        print(Lib.NEEDED_AMOUNT_OF_VECTORS)
-        print(Lib.SAMPLES_PER_SEC * Lib.TIME_PER_CHUNK *
-              Lib.NEEDED_AMOUNT_OF_VECTORS)
         noiseMiddle = noise.generateBandLimitedNoise(
             Lib.LOWER_LOW_FREQUENCY_BOUND,
             Lib.LOWER_UPPER_FREQUENCY_BOUND,
             Lib.SAMPLES_PER_SEC * Lib.TIME_PER_CHUNK * Lib.NEEDED_AMOUNT_OF_VECTORS,
-            Lib.SAMPLES_PER_SEC) * 100000
+            Lib.SAMPLES_PER_SEC) * 100
 
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
 
     # Send
-    print(signalToSend.shape)
-    print(noiseMiddle.shape)
-    signalToSend += noiseMiddle
     signalToSend = Numpy.concatenate(
-        [noiseStart, signalToSend, noiseEnd])
+        [noiseStart, signalToSend + noiseMiddle, noiseEnd])
 
     # Receive
     dataSignal = synthesizer.extractDataSignal(signalToSend)
-    encodedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
+    receivedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
+    print("RECEIVED VECTORS:")
+    print(receivedVectors)
 
     # Decode
-    decodedTuple = coder.decode(encodedVectors)
+    decodedTuple = coder.decode(receivedVectors)
     decodedString = decodedTuple[1]
     print("DECODED STRING:")
     print(decodedString)
@@ -67,6 +59,7 @@ if __name__ == "__main__":
     if (decodedTuple[0]):
         io.writeFile(Lib.FILENAME_WRITE, decodedString)
 
-        print("Same string? - " + repr(stringRead == decodedString))
+        print("Same string? - " + repr(stringRead.encode(Lib.UTF_8)
+                                       == decodedString.encode(Lib.UTF_8)))
     else:
         print(decodedTuple[1])

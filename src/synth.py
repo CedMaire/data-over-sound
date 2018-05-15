@@ -2,7 +2,7 @@ import numpy as Numpy
 import sounddevice as SoundDevice
 import matplotlib.pyplot as Plot
 import lib as Lib
-import Noise as Noise
+import noise as Noise
 
 
 class Synthesizer:
@@ -92,7 +92,7 @@ class Synthesizer:
         begin = index + Lib.NUMBER_NOISE_SAMPLES
         end = begin + Lib.NUMBER_DATA_SAMPLES
 
-        return record[begin:end]
+        return record[int(begin):int(end)]
 
     def projectSignalChunkOnBasis(self, signalChunk, sinus):
         resultArray = []
