@@ -29,13 +29,13 @@ if __name__ == "__main__":
         noiseMiddle = noise.generateBandLimitedNoise(
             Lib.UPPER_LOW_FREQUENCY_BOUND,
             Lib.UPPER_UPPER_FREQUENCY_BOUND,
-            Lib.SAMPLES_PER_SEC * Lib.TIME_PER_CHUNK * Lib.NEEDED_AMOUNT_OF_VECTORS,
+            Lib.NUMBER_DATA_SAMPLES,
             Lib.SAMPLES_PER_SEC) * 100
     else:
         noiseMiddle = noise.generateBandLimitedNoise(
             Lib.LOWER_LOW_FREQUENCY_BOUND,
             Lib.LOWER_UPPER_FREQUENCY_BOUND,
-            Lib.SAMPLES_PER_SEC * Lib.TIME_PER_CHUNK * Lib.NEEDED_AMOUNT_OF_VECTORS,
+            Lib.NUMBER_DATA_SAMPLES,
             Lib.SAMPLES_PER_SEC) * 100
 
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)

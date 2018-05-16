@@ -35,13 +35,23 @@ class Synthesizer:
 
     def generateCompleteSignal(self, array, nonoise):
         signal = Numpy.zeros(0)
-        i=0
+
+        savedSignalDict = {}
+
+        i = 0
         for a in array:
-            inter = self.generateVectorSignal(a, nonoise)
-            signal = Numpy.concatenate([signal, inter])
-            if(i==len(array)-300):
+            if (repr(a) in savedSignalDict):
+                signal = Numpy.concatenate(
+                    [signal, savedSignalDict.get(repr(a))])
+            else:
+                inter = self.generateVectorSignal(a, nonoise)
+                savedSignalDict[repr(a)] = inter
+                signal = Numpy.concatenate([signal, inter])
+
+            if (i == len(array)-300):
                 print("Prepare your ears !")
-            i=i+1
+            i = i + 1
+
         return signal
 
     def computeFrequencies(self, vector, lowerFrequencyBound):
