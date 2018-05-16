@@ -19,6 +19,7 @@ if __name__ == "__main__":
     noNoise = synthesizer.detectNoise()
     synchNoise = synthesizer.createWhiteNoise()
 
+    print("Building Signal...")
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
     signalToSend = Numpy.concatenate([synchNoise, signalToSend])
 

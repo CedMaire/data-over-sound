@@ -2,7 +2,7 @@ import numpy as Numpy
 import sounddevice as SoundDevice
 import matplotlib.pyplot as Plot
 import lib as Lib
-import noise as Noise
+import noisedeux as Noise
 
 
 class Synthesizer:
@@ -35,11 +35,13 @@ class Synthesizer:
 
     def generateCompleteSignal(self, array, nonoise):
         signal = Numpy.zeros(0)
-
+        i=0
         for a in array:
             inter = self.generateVectorSignal(a, nonoise)
             signal = Numpy.concatenate([signal, inter])
-
+            if(i==len(array)-300):
+                print("Prepare your ears !")
+            i=i+1
         return signal
 
     def computeFrequencies(self, vector, lowerFrequencyBound):
@@ -92,7 +94,7 @@ class Synthesizer:
         begin = index + Lib.NUMBER_NOISE_SAMPLES
         end = begin + Lib.NUMBER_DATA_SAMPLES
 
-        return record[int(begin):int(end)]
+        return record[begin:end]
 
     def projectSignalChunkOnBasis(self, signalChunk, sinus):
         resultArray = []
