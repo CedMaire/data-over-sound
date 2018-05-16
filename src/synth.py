@@ -86,22 +86,22 @@ def pseudoQAM(vector, nonoise, time=lib.TIME_BY_CHUNK):
         f=f+1000
     if (vector[0]==1):
         print("1")
-        signal=signal + np.cos(2*np.pi*t*f/lib.FS)
+        signal=signal + 10*np.cos(2*np.pi*t*f/lib.FS)
     else:
         print("2")
-        signal=signal -np.cos(2*np.pi*t*f/lib.FS)
+        signal=signal -10*np.cos(2*np.pi*t*f/lib.FS)
     if (vector[1]==1):
         print("3")
-        signal=signal + np.sin(2*np.pi*t*f/lib.FS)
+        signal=signal + 10*np.sin(2*np.pi*t*f/lib.FS)
     else:
         print("4")
-        signal=signal -np.sin(2*np.pi*t*f/lib.FS)
+        signal=signal -10*np.sin(2*np.pi*t*f/lib.FS)
 
     return signal
 
 
 # time : in seconds
-def receive(time=150*lib.TIME_BY_CHUNK + lib.NOISE_TIME):
+def receive(time=15*lib.TIME_BY_CHUNK + lib.NOISE_TIME):
     sd.default.channels = 1
     record = sd.rec(int(np.ceil(time*lib.FS)), lib.FS, blocking=True)
     return record[:, 0]
@@ -163,8 +163,8 @@ def decodeQAM(signal, nonoise):
     sinus = np.zeros(t.shape)
     cosinus= np.zeros(t.shape)
     f=1500 if nonoise==1 else 2500
-    sinus= sinus+np.sin(2*np.pi*t*f/lib.FS)
-    cosinus= cosinus+np.cos(2*np.pi*t*f/lib.FS)
+    sinus= sinus+10*np.sin(2*np.pi*t*f/lib.FS)
+    cosinus= cosinus+10*np.cos(2*np.pi*t*f/lib.FS)
     dot1st=np.dot(signal,cosinus)
     dot2nd=np.dot(signal,sinus)
     print(dot1st,dot2nd)
@@ -189,20 +189,17 @@ def decodeSignal(signal, nonoise):
     return chunks
 
 
-
-
 # TEST
 # Sending
-'''
+"""
 nonoise=detectNoise()
 noise1=createWhiteNoise(lib.NOISE_TIME)
-a = [[0],[1],[1],[0],[0],[1],[0],[0],[0],[1],[1],[0],[0],[1],[0],[0],
-     [0],[1],[1],[0],[0],[1],[0],[0],[0],[1],[1],[0],[0],[1],[0],[0]]
+a = [[0,1],[1,0],[0,1],[0,0],[0,1],[1,0],[0,1],[0,0]]
 signal=sendArrayVector(a,nonoise)
 fullSignal=np.concatenate([noise1,signal])
 sd.play(fullSignal)
 sd.wait()
-'''
+"""
 
 
 # Local test
@@ -210,21 +207,21 @@ sd.wait()
 noise1 = createWhiteNoise()
 noise2 = createWhiteNoise(lib.NOISE_TIME, 3)
 
-a = [[1, 1],[1,0],[0,0],[1,0],[1,1]]
+a = [[1, 1],[1,0],[0,0],[1,0],[1,1],[1, 1],[1,0],[0,0],[1,0],[1,1],[1, 1],[1,0],[0,0],[1,0],[1,1]]
 length = len(a)
 
 NONOISE = 2
-"""if(NONOISE == 2):
+if(NONOISE == 2):
     noise3 = noise.band_limited_noise(
         2000, 3000, lib.FS*lib.TIME_BY_CHUNK * length, lib.FS)*100
 else:
     noise3 = noise.band_limited_noise(
         1000, 2000, lib.FS*lib.TIME_BY_CHUNK * length, lib.FS)*100
-"""
+
 signal = sendArrayVector(a,NONOISE)
 #signal = signal+noise3
 midSignal = np.concatenate([noise1, signal])
-fullSignal = np.concatenate([noise2, midSignal])
+fullSignal = np.concatenate([noise2, midSignal])*0.01
 plt.plot(fullSignal)
 plt.show()
 sync = sync(fullSignal, length)
