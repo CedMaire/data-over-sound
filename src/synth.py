@@ -31,7 +31,7 @@ class Synthesizer:
     def createWhiteNoise(self):
         Numpy.random.seed(Lib.NOISE_SEED)
 
-        return Numpy.random.normal(0, 1, Lib.NUMBER_NOISE_SAMPLES)
+        return 100*Numpy.random.normal(0, 1, Lib.NUMBER_NOISE_SAMPLES)
 
     def generateCompleteSignal(self, array, nonoise):
         signal = Numpy.zeros(0)
@@ -112,6 +112,7 @@ class Synthesizer:
         i = 0
         for s in sinus:
             dotProduct = Numpy.dot(s, signalChunk)
+            print(dotProduct)
             resultArray.append(1 if (dotProduct >= 0) else 0)
 
             i = i + 1
@@ -131,7 +132,7 @@ class Synthesizer:
                 f = Lib.LOWER_UPPER_FREQUENCY_BOUND + \
                     Lib.FREQUENCY_STEP * (i + 1)
 
-            sinus[i, :] = Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
+            sinus[i, :] = 100*Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
 
         # Compute the chunks corresponding to the vectors and project them on the basis.
         # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
