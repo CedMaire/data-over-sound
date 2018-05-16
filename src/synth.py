@@ -77,7 +77,7 @@ class Synthesizer:
         signal = Numpy.zeros(t.shape)
 
         for f in freqs:
-            signal = signal + 10 * \
+            signal = signal + 15 * \
                 Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
 
         return signal
