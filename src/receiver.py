@@ -8,12 +8,16 @@ if __name__ == "__main__":
     coder = Coder.Coder()
     synthesizer = Synthesizer.Synthesizer()
 
+    print("Detecting Noise")
     noNoise = synthesizer.detectNoise()
+    print("Recording Signal")
     recording = synthesizer.recordSignal()
+    print("Extracting Data Signal")
     dataSignal = synthesizer.extractDataSignal(recording)
-    encodedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
+    receivedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
+    print(receivedVectors)
 
-    decodedTuple = coder.decode(encodedVectors)
+    decodedTuple = coder.decode(receivedVectors)
     decodedString = decodedTuple[1]
     print("DECODED STRING:")
     print(decodedString)

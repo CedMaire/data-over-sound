@@ -125,8 +125,8 @@ class Synthesizer:
 
         # Compute the chunks corresponding to the vectors and project them on the basis.
         # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
-        chunks = [signal[i:int(i + Lib.ELEMENTS_PER_CHUNK)]
-                  for i in range(0, len(signal), int(Lib.ELEMENTS_PER_CHUNK))]
+        chunks = [signal[i:i + Lib.ELEMENTS_PER_CHUNK]
+                  for i in range(0, len(signal), Lib.ELEMENTS_PER_CHUNK)]
 
         i = 0
         for chunk in chunks:
