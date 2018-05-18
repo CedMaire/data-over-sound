@@ -2,6 +2,7 @@ import iodeux as IODeux
 import lib as Lib
 import coder as Coder
 import synth as Synthesizer
+import numpy as Numpy
 
 if __name__ == "__main__":
     io = IODeux.IODeux()
@@ -12,6 +13,8 @@ if __name__ == "__main__":
     noNoise = synthesizer.detectNoise()
     print("Recording Signal")
     recording = synthesizer.recordSignal()
+    #Numpy.save("record",recording)
+    #recording=Numpy.load("record.npy")
     print("Extracting Data Signal")
     dataSignal = synthesizer.extractDataSignal(recording)
     receivedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
