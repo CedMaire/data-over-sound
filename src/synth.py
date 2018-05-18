@@ -59,7 +59,7 @@ class Synthesizer:
     def computeFrequencies(self, vector, lowerFrequencyBound):
         frequencies = []
 
-        for i in range(0, 1)
+        for i in range(0, 1):
         #Lib.CHUNK_SIZE):
             if (vector[i] == 1):
                 frequencies.append(1500)
@@ -89,8 +89,7 @@ class Synthesizer:
     def recordSignal(self):
         SoundDevice.default.channels = 1
 
-        rec=SoundDevice.rec(
-            int(Numpy.ceil(100*6000,6000,blocking=True)[:,0]
+        rec=SoundDevice.rec(int(Numpy.ceil(100*6000)),6000,blocking=True)[:,0]
             #Lib.RECORDING_SAMPLES_TOTA)), Lib.SAMPLES_PER_SEC, blocking=True)[:, 0]
         SoundDevice.rec()
         return rec
@@ -102,9 +101,9 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
-        for i in range(int(Numpy.floor(record.size - (40*6000+2*6000))))
+        for i in range(int(Numpy.floor(record.size - (40*6000+2*6000)))):
         #(Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
-            dotProduct = Numpy.dot(noiseToSyncOn,record[i:2*6000]
+            dotProduct = Numpy.dot(noiseToSyncOn,record[i:2*6000])
                                    #Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct >= maxDotProduct):
                 print(i,dotProduct)
@@ -164,9 +163,9 @@ class Synthesizer:
 
         # Compute the chunks corresponding to the vectors and project them on the basis.
         # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
-        chunks = [signal[i:i + 6000]]
+        chunks = [signal[i:i + 6000]for i in range(0, len(signal), 6000)]
         #Lib.ELEMENTS_PER_CHUNK]
-                  for i in range(0, len(signal), 6000)
+
                   #Lib.ELEMENTS_PER_CHUNK)]
 
         i = 0
