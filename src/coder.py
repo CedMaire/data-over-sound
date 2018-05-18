@@ -8,7 +8,7 @@ class Coder:
     # Constuctor, initializes the parameters.
     def __init__(self):
         self.RSCoder = ReedSalomon.rs.RSCoder(
-            Lib.CODE_WORD_LENGTH, Lib.MESSAGE_LENGTH)
+            255, Lib.MESSAGE_LENGTH)
         self.receivedData = list()
 
     # TODO: Test

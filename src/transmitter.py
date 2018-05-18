@@ -16,6 +16,8 @@ if __name__ == "__main__":
     print("ENCODED VECTORS:")
     print(encodedVectors)
 
+    encodedVectors = encodedVectors[0:int(len(encodedVectors) / 51)]
+
     noNoise = synthesizer.detectNoise()
     synchNoise = synthesizer.createWhiteNoise()
 
