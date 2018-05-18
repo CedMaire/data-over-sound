@@ -25,5 +25,5 @@ if __name__ == "__main__":
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
     signalToSend = Numpy.concatenate([synchNoise, signalToSend])
 
-    SoundDevice.play(signalToSend)
+    SoundDevice.play(signalToSend,6000)
     SoundDevice.wait()
