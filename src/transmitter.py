@@ -14,9 +14,10 @@ if __name__ == "__main__":
 
     encodedVectors = coder.encode(stringRead)
     print("ENCODED VECTORS:")
-    print(encodedVectors)
 
     encodedVectors = encodedVectors[0:int(len(encodedVectors) / 51)]
+    print(encodedVectors)
+    print(len(encodedVectors))
 
     noNoise = synthesizer.detectNoise()
     synchNoise = synthesizer.createWhiteNoise()
@@ -25,5 +26,5 @@ if __name__ == "__main__":
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
     signalToSend = Numpy.concatenate([synchNoise, signalToSend])
 
-    SoundDevice.play(signalToSend,6000)
+    SoundDevice.play(signalToSend, 6000)
     SoundDevice.wait()
