@@ -33,15 +33,18 @@ class Synthesizer:
         return Numpy.random.normal(0, 1, Lib.NUMBER_NOISE_SAMPLES)
 
     def generateCompleteSignal(self, array, nonoise):
+        synchNoise = self.createWhiteNoise()
         signal = Numpy.zeros(0)
 
         savedSignalDict = {}
 
         i = 0
         for a in array:
+            if (i % Lib.NOISE_REPEAT_FREQUENCY == 0):
+                signal = Numpy.concatenate([signal, Numpy.zeros(1000), synchNoise])
+
             if (repr(a) in savedSignalDict):
-                signal = Numpy.concatenate(
-                    [signal, savedSignalDict.get(repr(a))])
+                signal = Numpy.concatenate([signal, savedSignalDict.get(repr(a))])
             else:
                 inter = self.generateVectorSignal(a, nonoise)
                 savedSignalDict[repr(a)] = inter
@@ -85,23 +88,37 @@ class Synthesizer:
         SoundDevice.default.channels = 1
 
         return SoundDevice.rec(
-            int(Numpy.ceil(Lib.RECORDING_SAMPLES_TOTAL)), Lib.SAMPLES_PER_SEC, blocking=True)[:, 0]
+            int(Numpy.ceil(Lib.RECORDING_SAMPLES_TOTAL)), Lib.SAMPLES_PER_SEC, blocking=True, channels=1)[:, 0]
 
-    def extractDataSignal(self, record):
+    def extractDataSignal(self, record, firstSynch):
         noiseToSyncOn = self.createWhiteNoise()
 
         maxDotProduct = 0
         index = 0
 
-        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
-            dotProduct = Numpy.dot(noiseToSyncOn,
-                                   record[i:Lib.NUMBER_NOISE_SAMPLES + i])
-            if (dotProduct > maxDotProduct):
-                maxDotProduct = dotProduct
-                index = i
+        begin = None
+        end = None
 
-        begin = index + Lib.NUMBER_NOISE_SAMPLES
-        end = begin + Lib.NUMBER_DATA_SAMPLES
+        if (firstSynch):
+            for i in range(0, int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+                dotProduct = Numpy.dot(noiseToSyncOn,
+                                       record[i:Lib.NUMBER_NOISE_SAMPLES + i])
+                if (dotProduct > maxDotProduct):
+                    maxDotProduct = dotProduct
+                    index = i
+
+            begin = index + Lib.NUMBER_NOISE_SAMPLES
+            end = begin + Lib.NUMBER_DATA_SAMPLES
+        else:
+            for i in range(0, Lib.NUMBER_NOISE_SAMPLES + Lib.ADDITIONAL_NOISE_SAMPLES):
+                dotProduct = Numpy.dot(noiseToSyncOn,
+                                       record[i:Lib.NUMBER_NOISE_SAMPLES + i])
+                if (dotProduct > maxDotProduct):
+                    maxDotProduct = dotProduct
+                    index = i
+
+            begin = index + Lib.NUMBER_NOISE_SAMPLES
+            end = len(record)
 
         return record[begin:end]
 
@@ -118,6 +135,8 @@ class Synthesizer:
         return resultArray
 
     def decodeSignalToBitVectors(self, signal, nonoise):
+        # dataSignal = synthesizer.extractDataSignal(recording)
+
         # Compute the basis
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
         sinus = Numpy.zeros([Lib.CHUNK_SIZE, len(t)])
@@ -131,6 +150,9 @@ class Synthesizer:
                     Lib.FREQUENCY_STEP * (i + 1)
 
             sinus[i, :] = Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
+
+        signal = self.extractDataSignal(signal, True)
+        # TODO: continue
 
         # Compute the chunks corresponding to the vectors and project them on the basis.
         # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks

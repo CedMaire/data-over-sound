@@ -17,10 +17,8 @@ if __name__ == "__main__":
     print(encodedVectors)
 
     noNoise = synthesizer.detectNoise()
-    synchNoise = synthesizer.createWhiteNoise()
 
     print("Building Signal...")
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
-    signalToSend = Numpy.concatenate([synchNoise, signalToSend])
 
     SoundDevice.play(signalToSend, Lib.SAMPLES_PER_SEC, blocking=True)

@@ -12,9 +12,8 @@ if __name__ == "__main__":
     noNoise = synthesizer.detectNoise()
     print("Recording Signal")
     recording = synthesizer.recordSignal()
-    print("Extracting Data Signal")
-    dataSignal = synthesizer.extractDataSignal(recording)
-    receivedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
+    print("Extracting Vectors")
+    receivedVectors = synthesizer.decodeSignalToBitVectors(recording, noNoise)
     print(receivedVectors)
 
     decodedTuple = coder.decode(receivedVectors)
