@@ -20,8 +20,16 @@ if __name__ == "__main__":
     synchNoise = synthesizer.createWhiteNoise()
 
     print("Building Signal...")
-    signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
-    signalToSend = Numpy.concatenate([synchNoise, signalToSend])
+    tmp = synthesizer.generateCompleteSignal(encodedVectors[0:51], noNoise)
+    print("encodedVectors[0:(51)]")
+    signalToSend = Numpy.concatenate([synchNoise, tmp])
+    for i in range(1,40):
+        tmp = synthesizer.generateCompleteSignal(encodedVectors[51*i:(51+51*i)], noNoise)
+        print("encodedVectors[",51*i,":(",51+51*i,")]")
+        tmp2 = Numpy.concatenate([signalToSend, synchNoise])
+        signalToSend = Numpy.concatenate([tmp2, tmp])
+        #print(len(signalToSend))
 
+    print("Done")
     SoundDevice.play(signalToSend)
     SoundDevice.wait()
