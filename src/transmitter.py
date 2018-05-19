@@ -1,25 +1,30 @@
 import iodeux as IODeux
 import lib as Lib
 import coder as Coder
+import synth as Synthesizer
+import sounddevice as SoundDevice
+import numpy as Numpy
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     io = IODeux.IODeux()
     coder = Coder.Coder()
+    synthesizer = Synthesizer.Synthesizer()
 
     stringRead = io.readFile(Lib.FILENAME_READ)
 
     encodedVectors = coder.encode(stringRead)
     print("ENCODED VECTORS:")
+
+    encodedVectors = encodedVectors[0:int(len(encodedVectors) / 51)]
     print(encodedVectors)
+    print(len(encodedVectors))
 
-    decodedTuple = coder.decode(encodedVectors)
-    decodedString = decodedTuple[1]
-    print("DECODED STRING:")
-    print(decodedString)
+    noNoise = synthesizer.detectNoise()
+    synchNoise = synthesizer.createWhiteNoise()
 
-    if (decodedTuple[0]):
-        io.writeFile(Lib.FILENAME_WRITE, decodedString)
+    print("Building Signal...")
+    signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
+    signalToSend = Numpy.concatenate([synchNoise, signalToSend])
 
-        print("Same string? - " + repr(stringRead == decodedString))
-    else:
-        print(decodedTuple[1])
+    SoundDevice.play(signalToSend, 6000)
+    SoundDevice.wait()

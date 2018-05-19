@@ -1,14 +1,14 @@
 import unireedsolomon as ReedSalomon
 import lib as Lib
 import mpmath as BigNumbers
-import numpy as np
+import numpy as Numpy
 
 
 class Coder:
     # Constuctor, initializes the parameters.
     def __init__(self):
         self.RSCoder = ReedSalomon.rs.RSCoder(
-            Lib.CODE_WORD_LENGTH, Lib.MESSAGE_LENGTH)
+            255, Lib.MESSAGE_LENGTH)
         self.receivedData = list()
 
     # TODO: Test
@@ -120,7 +120,7 @@ class Coder:
     # "He" -> [[0, 1, 0, 0, 1, 0, 0, 0], [0, 1, 1, 0, 0, 1, 0, 1]]
     def stringToListOfByteVectors(self, string):
         tmp = list(
-            map(lambda x: bin(x)[2:], self.randomizeBytes(string.encode(Lib.UTF_8))))
+            map(lambda x: bin(x)[2:], self.randomizeBytes(string.encode(Lib.LATIN_1))))
 
         output = list()
         for e in tmp:
@@ -143,10 +143,10 @@ class Coder:
             map(lambda bitString: int(bitString, 2),
                 map(lambda vector: "".join(
                     map(lambda x: repr(x), vector)), byteVectors))))).decode(
-                        Lib.UNICODE_ESCAPE).encode(Lib.LATIN_1).decode(Lib.UTF_8)
+                        Lib.UNICODE_ESCAPE).encode(Lib.LATIN_1).decode(Lib.LATIN_1)
 
     # Creates a random array using a seed.
     def createRandomArray(self, array_size, seed, max_value):
-        np.random.seed(seed)
-        tmp = np.random.randint(max_value, size=(array_size))
+        Numpy.random.seed(seed)
+        tmp = Numpy.random.randint(max_value, size=(array_size))
         return tmp
