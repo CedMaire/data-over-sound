@@ -32,7 +32,7 @@ class Synthesizer:
     def createWhiteNoise(self):
         Numpy.random.seed(Lib.NOISE_SEED)
 
-        return Numpy.random.normal(0, 1, 6000*2)
+        return Numpy.random.normal(0, 1, 12000*2)
         # Lib.NUMBER_NOISE_SAMPLE)
 
     def generateCompleteSignal(self, array, nonoise):
@@ -83,7 +83,7 @@ class Synthesizer:
         signal = Numpy.zeros(t.shape)
 
         for f in freqs:
-            signal = signal + 1 * Numpy.sin(2 * Numpy.pi * t * f / 6000)
+            signal = signal + 10 * Numpy.sin(2 * Numpy.pi * t * f / 12000)
             print("Len vect signal", len(signal))
             # Lib.SAMPLES_PER_SEC)
 
@@ -92,10 +92,10 @@ class Synthesizer:
     def recordSignal(self):
         SoundDevice.default.channels = 1
 
-        rec=SoundDevice.rec(60*6000,6000,blocking=True)[:,0]
-            #Lib.RECORDING_SAMPLES_TOTA)), Lib.SAMPLES_PER_SEC, blocking=True)[:, 0]
+        rec = SoundDevice.rec(60*12000, 12000, blocking=True)[:, 0]
+        # Lib.RECORDING_SAMPLES_TOTA)), Lib.SAMPLES_PER_SEC, blocking=True)[:, 0]
         SoundDevice.wait()
-        print("lenrec",len(rec))
+        print("lenrec", len(rec))
         return rec
 
     def extractDataSignal(self, record):
@@ -106,14 +106,14 @@ class Synthesizer:
         maxDotProduct = 0
         index = 0
         for i in range(record.size - (40*6000+2*6000)):
-        #(Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
-            dotProduct = Numpy.dot(noiseToSyncOn,record[i:2*6000+i])
-                                   #Lib.NUMBER_NOISE_SAMPLES + i])
+            # (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+            dotProduct = Numpy.dot(noiseToSyncOn, record[i:2*12000+i])
+            # Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct >= maxDotProduct):
                 print(i, dotProduct)
                 maxDotProduct = dotProduct
                 index = i
-        begin = index + 2*6000
+        begin = index + 2*6000 + 6000 + 17800
         # Lib.NUMBER_NOISE_SAMPLE
         end = begin + 40*6000
         # Lib.NUMBER_DATA_SAMPLES
@@ -126,9 +126,9 @@ class Synthesizer:
         Plot.plot(record[end:len(record)])
         Plot.show()
 
-        print("nb of data",40*6000)
-        #Lib.NUMBER_DATA_SAMPLES)
-        print("begin",begin,"end",end)
+        print("nb of data", 40*6000)
+        # Lib.NUMBER_DATA_SAMPLES)
+        print("begin", begin, "end", end)
         print("record len", len(record))
         Plot.plot(record[begin:end])
         Plot.show()
@@ -149,10 +149,10 @@ class Synthesizer:
 
     def decodeSignalToBitVectors(self, signal, nonoise):
         # Compute the basis
-        t = Numpy.arange(0,6000)
-        #Lib.ELEMENTS_PER_CHUNK)
-        sinus = Numpy.zeros([1,len(t)])
-        #Lib.CHUNK_SIZE, len(t)])
+        t = Numpy.arange(0, 6000)
+        # Lib.ELEMENTS_PER_CHUNK)
+        sinus = Numpy.zeros([1, len(t)])
+        # Lib.CHUNK_SIZE, len(t)])
 
         for i in range(0, 1):
             # Lib.CHUNK_SIZE):
@@ -163,7 +163,7 @@ class Synthesizer:
                 f = Lib.LOWER_UPPER_FREQUENCY_BOUND + \
                     Lib.FREQUENCY_STEP * (i + 1)
 
-            sinus[i, :] = Numpy.sin(2 * Numpy.pi * t * f / 6000)
+            sinus[i, :] = 10 * Numpy.sin(2 * Numpy.pi * t * f / 12000)
             # Lib.SAMPLES_PER_SEC)
 
         # Compute the chunks corresponding to the vectors and project them on the basis.
