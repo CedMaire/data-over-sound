@@ -13,7 +13,8 @@ class Synthesizer:
         SoundDevice.default.channels = 1
         record = SoundDevice.rec(Lib.SAMPLES_PER_SEC * Lib.NOISE_DETECTION_TIME,
                                  Lib.SAMPLES_PER_SEC,
-                                 blocking=True)[:, 0]
+                                 blocking=True,
+                                 channels=1)[:, 0]
 
         recordfft = Numpy.fft.fft(record)
 
@@ -84,8 +85,10 @@ class Synthesizer:
     def recordSignal(self):
         SoundDevice.default.channels = 1
 
-        return SoundDevice.rec(
-            int(Numpy.ceil(Lib.RECORDING_SAMPLES_TOTAL)), Lib.SAMPLES_PER_SEC, blocking=True)[:, 0]
+        return SoundDevice.rec(int(Numpy.ceil(Lib.RECORDING_SAMPLES_TOTAL)),
+                               Lib.SAMPLES_PER_SEC,
+                               blocking=True,
+                               channels=1)[:, 0]
 
     def extractDataSignal(self, record):
         noiseToSyncOn = self.createWhiteNoise()
