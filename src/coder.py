@@ -1,6 +1,6 @@
 import unireedsolomon as ReedSalomon
 import lib as Lib
-import mpmath as BigNumbers
+# import mpmath as BigNumbers
 import numpy as Numpy
 
 
@@ -60,8 +60,8 @@ class Coder:
     # Chunks the 8-bit vectors into smaller vectors.
     def chunk(self, vectorList):
         # Chunk
-        chuncked = list(map(lambda vector: [vector[i:i + Lib.CHUNK_SIZE] for i in range(0, len(vector), Lib.CHUNK_SIZE)],
-                            vectorList))
+        chuncked = list(map(lambda vector: [vector[i:i + Lib.CHUNK_SIZE]
+                                            for i in range(0, len(vector), Lib.CHUNK_SIZE)], vectorList))
 
         # Flatten
         outputList = list()
@@ -131,7 +131,7 @@ class Coder:
 
         for e in output:
             if len(e) < 8:
-                for i in range(8-len(e)):
+                for i in range(8 - len(e)):
                     e.insert(0, 0)
 
         return output

@@ -1,6 +1,6 @@
 import numpy as Numpy
 import lib as Lib
-import sounddevice as SoundDevice
+# import sounddevice as SoundDevice
 from scipy.io import wavfile as WavFile
 import os as OS
 
@@ -16,7 +16,7 @@ class NoiseGenerator:
         phases = Numpy.random.rand(Np) * 2 * Numpy.pi
         phases = Numpy.cos(phases) + 1j * Numpy.sin(phases)
 
-        f[1:Np+1] *= phases
+        f[1:Np + 1] *= phases
         f[-1:-1 - Np:-1] = Numpy.conj(f[1:Np + 1])
 
         return Numpy.fft.ifft(f).real

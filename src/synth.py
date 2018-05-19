@@ -2,7 +2,7 @@ import numpy as Numpy
 import sounddevice as SoundDevice
 import matplotlib.pyplot as Plot
 import lib as Lib
-import noisedeux as Noise
+# import noisedeux as Noise
 
 
 class Synthesizer:
@@ -14,7 +14,6 @@ class Synthesizer:
         record = SoundDevice.rec(Lib.SAMPLES_PER_SEC * Lib.NOISE_DETECTION_TIME,
                                  Lib.SAMPLES_PER_SEC,
                                  blocking=True)[:, 0]
-        SoundDevice.wait()
 
         recordfft = Numpy.fft.fft(record)
 
@@ -48,7 +47,7 @@ class Synthesizer:
                 savedSignalDict[repr(a)] = inter
                 signal = Numpy.concatenate([signal, inter])
 
-            if (i == len(array)-300):
+            if (i == len(array) - 300):
                 print("Prepare your ears !")
             i = i + 1
 

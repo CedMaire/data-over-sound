@@ -59,7 +59,6 @@ if __name__ == "__main__":
     if (decodedTuple[0]):
         io.writeFile(Lib.FILENAME_WRITE, decodedString)
 
-        print("Same string? - " + repr(stringRead.encode(Lib.UTF_8)
-                                       == decodedString.encode(Lib.UTF_8)))
+        print("Same string? - " + repr(stringRead.encode(Lib.UTF_8) == decodedString.encode(Lib.UTF_8)))
     else:
         print(decodedTuple[1])
