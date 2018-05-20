@@ -77,18 +77,21 @@ class Synthesizer:
         signal = Numpy.zeros(t.shape)
 
         for f in freqs:
-            signal = signal + 15 * \
-                Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
+            signal = signal + Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
 
         return signal
 
     def recordSignal(self):
         SoundDevice.default.channels = 1
 
-        return SoundDevice.rec(int(Numpy.ceil(Lib.RECORDING_SAMPLES_TOTAL)),
-                               Lib.SAMPLES_PER_SEC,
-                               blocking=True,
-                               channels=1)[:, 0]
+        bla = SoundDevice.rec(int(Numpy.ceil(Lib.RECORDING_SAMPLES_TOTAL)),
+                              Lib.SAMPLES_PER_SEC,
+                              blocking=True,
+                              channels=1)[:, 0]
+        Plot.plot(bla)
+        Plot.show()
+
+        return bla
 
     def extractDataSignal(self, record):
         noiseToSyncOn = self.createWhiteNoise()
@@ -103,29 +106,35 @@ class Synthesizer:
                 maxDotProduct = dotProduct
                 index = i
 
-        begin = index + Lib.NUMBER_NOISE_SAMPLES
+        begin = index + Lib.NUMBER_NOISE_SAMPLES + 15000 - 3350
         end = begin + Lib.NUMBER_DATA_SAMPLES
 
-        return record[begin:end]
+        bla = record[begin:end]
+        Plot.plot(1.5 * record)
+        Plot.plot(Numpy.concatenate([Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
+        Plot.show()
+
+        return bla
 
     def projectSignalChunkOnBasis(self, signalChunk, sinus):
         resultArray = []
-
         i = 0
+        maxDot = 0
         for s in sinus:
             dotProduct = Numpy.dot(s, signalChunk)
-            resultArray.append(1 if (dotProduct >= 0) else 0)
-
+            print(i, dotProduct)
+            if(Numpy.abs(dotProduct) > Numpy.abs(maxDot)):
+                maxDot = dotProduct
             i = i + 1
-
+        resultArray.append(1 if (maxDot >= 0) else 0)
         return resultArray
 
     def decodeSignalToBitVectors(self, signal, nonoise):
         # Compute the basis
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
-        sinus = Numpy.zeros([Lib.CHUNK_SIZE, len(t)])
+        sinus = Numpy.zeros([20, len(t)])
 
-        for i in range(0, Lib.CHUNK_SIZE):
+        for i in range(0, 20):
             if (nonoise == 1):
                 f = Lib.LOWER_LOW_FREQUENCY_BOUND + \
                     Lib.FREQUENCY_STEP * (i + 1)
@@ -133,7 +142,7 @@ class Synthesizer:
                 f = Lib.LOWER_UPPER_FREQUENCY_BOUND + \
                     Lib.FREQUENCY_STEP * (i + 1)
 
-            sinus[i, :] = Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
+            sinus[i, :] = Numpy.sin((2 * Numpy.pi * t * f - i * Numpy.pi) / Lib.SAMPLES_PER_SEC)
 
         # Compute the chunks corresponding to the vectors and project them on the basis.
         # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
