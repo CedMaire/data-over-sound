@@ -13,6 +13,7 @@ if __name__ == "__main__":
     stringRead = io.readFile(Lib.FILENAME_READ)
 
     encodedVectors = coder.encode(stringRead)
+#   encodedVectors=encodedVectors[0:40]
     print("ENCODED VECTORS:")
     print(encodedVectors)
 
@@ -21,6 +22,6 @@ if __name__ == "__main__":
 
     print("Building Signal...")
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
-    signalToSend = Numpy.concatenate([synchNoise, signalToSend])
+    signalToSend = Numpy.concatenate([synchNoise, Numpy.zeros(6000),signalToSend])
 
     SoundDevice.play(signalToSend, Lib.SAMPLES_PER_SEC, blocking=True)

@@ -1,7 +1,9 @@
 import numpy as Numpy
 import sounddevice as SoundDevice
 import matplotlib.pyplot as Plot
+import iodeux as IODeux
 import lib as Lib
+import coder as Coder
 # import noisedeux as Noise
 
 
@@ -106,7 +108,7 @@ class Synthesizer:
                 maxDotProduct = dotProduct
                 index = i
 
-        begin = index + Lib.NUMBER_NOISE_SAMPLES + 15000 - 3350
+        begin = index + Lib.NUMBER_NOISE_SAMPLES + 15000 - 3354
         end = begin + Lib.NUMBER_DATA_SAMPLES
 
         bla = record[begin:end]
@@ -120,21 +122,73 @@ class Synthesizer:
         resultArray = []
         i = 0
         maxDot = 0
+        """
+        Plot.plot(sinus[0])
+        Plot.plot(sinus[1])
+        Plot.plot(sinus[9])
+        Plot.show()
+        """
+        """
         for s in sinus:
             dotProduct = Numpy.dot(s, signalChunk)
             print(i, dotProduct)
             if(Numpy.abs(dotProduct) > Numpy.abs(maxDot)):
                 maxDot = dotProduct
             i = i + 1
-        resultArray.append(1 if (maxDot >= 0) else 0)
+        """
+        dotProduct = Numpy.dot(sinus[0], signalChunk)
+        print(Numpy.abs(dotProduct))
+        resultArray.append(1 if (dotProduct >= 0) else 0)
+        return resultArray
+
+    def realDecode(self, dotArray,resultArray):
+        print(len(resultArray), len(dotArray))
+        index=Numpy.ndarray.tolist(Numpy.arange(len(dotArray)))
+        zipped=zip(dotArray,index)
+        separate=[]
+        block=[]
+        for a,b in zipped:
+            if a>15:
+                block.append(b)
+            elif a<=15:
+                if len(block) != 0:
+                     separate.append(block)
+                block=[b]
+                separate.append(block)
+                block=[]
+        separate.append(block)
+        flip=False
+        print(separate)
+        counter=0
+        """
+        TEST
+        """
+        io = IODeux.IODeux()
+        coder = Coder.Coder()
+        stringRead = io.readFile(Lib.FILENAME_READ)
+        encodedVectors = coder.encode(stringRead)
+
+
+        for s in separate:
+            if (len(s)>2 and flip):
+                flip=False
+                #print("Flipping from" ,s[0], "to", s[len(s)-1])
+                for i in s:
+                    resultArray[i]=[0] if resultArray[i]==[1] else [1]
+            elif (len(s)>2 and not flip):
+                #print("NOT Flipping from" ,s[0], "to", s[len(s)-1])
+                flip=True
+            elif (len(s)==1):
+                counter=counter+1
+                print(s, resultArray[s[0]], encodedVectors[s[0]], dotArray[s[0]])
         return resultArray
 
     def decodeSignalToBitVectors(self, signal, nonoise):
         # Compute the basis
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
-        sinus = Numpy.zeros([20, len(t)])
+        sinus = Numpy.zeros([10, len(t)])
 
-        for i in range(0, 20):
+        for i in range(0, 10):
             if (nonoise == 1):
                 f = Lib.LOWER_LOW_FREQUENCY_BOUND + \
                     Lib.FREQUENCY_STEP * (i + 1)
@@ -142,17 +196,21 @@ class Synthesizer:
                 f = Lib.LOWER_UPPER_FREQUENCY_BOUND + \
                     Lib.FREQUENCY_STEP * (i + 1)
 
-            sinus[i, :] = Numpy.sin((2 * Numpy.pi * t * f - i * Numpy.pi) / Lib.SAMPLES_PER_SEC)
+            sinus[i, :] = Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC-i*Numpy.pi/36))
 
         # Compute the chunks corresponding to the vectors and project them on the basis.
         # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
         chunks = [signal[i:i + Lib.ELEMENTS_PER_CHUNK]
                   for i in range(0, len(signal), Lib.ELEMENTS_PER_CHUNK)]
-
         i = 0
+        resultArray=[]
+        dotArray=[]
         for chunk in chunks:
-            chunks[i] = self.projectSignalChunkOnBasis(chunk, sinus)
-
+            dotProduct=Numpy.dot(sinus[0], chunk)
+            dotArray.append(Numpy.abs(dotProduct))
+            resultArray.append([1] if (dotProduct >= 0) else [0])
             i += 1
-
-        return chunks
+        Plot.plot(dotArray)
+        Plot.show()
+        resultArray=self.realDecode(dotArray,resultArray)
+        return resultArray
