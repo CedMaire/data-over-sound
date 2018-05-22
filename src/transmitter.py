@@ -21,11 +21,11 @@ if __name__ == "__main__":
 
     print("Building Signal...")
     tmp = synthesizer.generateCompleteSignal(encodedVectors[0:51], noNoise)
-    print("encodedVectors[0:(51)]")
+    #print("encodedVectors[0:(51)]")
     signalToSend = Numpy.concatenate([synchNoise, tmp])
     for i in range(1,40):
         tmp = synthesizer.generateCompleteSignal(encodedVectors[51*i:(51+51*i)], noNoise)
-        print(i," encodedVectors[",51*i,":(",51+51*i,")]")
+        #print(i," encodedVectors[",51*i,":(",51+51*i,")]")
         tmp2 = Numpy.concatenate([signalToSend, synchNoise])
         signalToSend = Numpy.concatenate([tmp2, tmp])
         #print(len(signalToSend))

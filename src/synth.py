@@ -93,6 +93,7 @@ class Synthesizer:
 
         index = 0
         tmp = {}
+        print("Start to compute dot products for noise indexes")
         for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
             dotProduct = Numpy.dot(
                 noiseToSyncOn, record[i:Lib.NUMBER_NOISE_SAMPLES + i])
@@ -108,14 +109,21 @@ class Synthesizer:
             biggestIndex.append(a)
             del tmp[a]
 
+        print("indexes : ",biggestIndex)
+
         dataSignal = []
         biggestIndex2 = Numpy.sort(biggestIndex)
         for x in range(len(biggestIndex2)):
             begin = biggestIndex2[x] + Lib.NUMBER_NOISE_SAMPLES
             if x < len(biggestIndex2)-1:
                 end = biggestIndex2[x+1]
-            else : end = len(record)
-            dataSignal = Numpy.concatenate([dataSignal, record[begin:end]])
+            else : end = begin + int(Numpy.ceil(Lib.NUMBER_DATA_SAMPLES))
+            #print(x,"ième concatenation")
+            if x==39:
+                dataSignal = Numpy.concatenate([dataSignal, record[begin:end], [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]])
+            else : dataSignal = Numpy.concatenate([dataSignal, record[begin:end]])
+        print("length of datasignal : ",len(dataSignal)) #786817 962246
+        #print(dataSignal)
 
         return dataSignal
         # begin = index + Lib.NUMBER_NOISE_SAMPLES
@@ -129,9 +137,7 @@ class Synthesizer:
         i = 0
         for s in sinus:
             dotProduct = Numpy.dot(s, signalChunk)
-            print(dotProduct)
             resultArray.append(1 if (dotProduct >= 0) else 0)
-
             i = i + 1
 
         return resultArray
