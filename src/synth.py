@@ -98,7 +98,7 @@ class Synthesizer:
             tmp = {i, dotProduct}
 
         biggestIndex = []
-        for x in range 40:
+        for x in range (40):
             maxDotProduct = 0
             for key, val in tmp.items():
                 if (val > maxDotProduct):
