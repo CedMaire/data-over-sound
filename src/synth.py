@@ -112,7 +112,7 @@ class Synthesizer:
         biggestIndex2 = Numpy.sort(biggestIndex)
         for x in range(len(biggestIndex2)):
             begin = biggestIndex2[x] + Lib.NUMBER_NOISE_SAMPLES
-            if x < len(biggestIndex2-2):
+            if x < len(biggestIndex2)-1:
                 end = biggestIndex2[x+1]
             else : end = len(record)
             dataSignal = Numpy.concatenate([dataSignal, record[begin:end]])
