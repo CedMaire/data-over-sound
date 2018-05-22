@@ -94,7 +94,7 @@ class Synthesizer:
         maxDotProduct = 0
         index = 0
 
-        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES/40 + Lib.NUMBER_NOISE_SAMPLES)))):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
@@ -102,9 +102,9 @@ class Synthesizer:
                 index = i
 
         begin = index + Lib.NUMBER_NOISE_SAMPLES
-        end = begin + Lib.NUMBER_DATA_SAMPLES
+        end = begin + int(Numpy.ceil(Lib.NUMBER_DATA_SAMPLES/40))
 
-        return record[begin:end]
+        return record[begin:end], end
 
     def projectSignalChunkOnBasis(self, signalChunk, sinus):
         resultArray = []
