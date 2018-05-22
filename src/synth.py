@@ -31,7 +31,7 @@ class Synthesizer:
     def createWhiteNoise(self):
         Numpy.random.seed(Lib.NOISE_SEED)
 
-        return 100*Numpy.random.normal(0, 1, Lib.NUMBER_NOISE_SAMPLES)
+        return 100 * Numpy.random.normal(0, 1, Lib.NUMBER_NOISE_SAMPLES)
 
     def generateCompleteSignal(self, array, nonoise):
         signal = Numpy.zeros(0)
@@ -48,7 +48,7 @@ class Synthesizer:
                 savedSignalDict[repr(a)] = inter
                 signal = Numpy.concatenate([signal, inter])
 
-            if (i == len(array)-300):
+            if (i == len(array) - 300):
                 print("Prepare your ears !")
             i = i + 1
 
@@ -91,20 +91,36 @@ class Synthesizer:
     def extractDataSignal(self, record):
         noiseToSyncOn = self.createWhiteNoise()
 
-        maxDotProduct = 0
         index = 0
+        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+            dotProduct = Numpy.dot(
+                noiseToSyncOn, record[i:Lib.NUMBER_NOISE_SAMPLES + i])
+            tmp = {i, dotProduct}
 
-        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES/40 + Lib.NUMBER_NOISE_SAMPLES)))):
-            dotProduct = Numpy.dot(noiseToSyncOn,
-                                   record[i:Lib.NUMBER_NOISE_SAMPLES + i])
-            if (dotProduct > maxDotProduct):
-                maxDotProduct = dotProduct
-                index = i
+        biggestIndex = []
+        for x in range 40:
+            maxDotProduct = 0
+            for key, val in tmp.items():
+                if (val > maxDotProduct):
+                    maxDotProduct = val
+                    a = key
+            biggestIndex.append(a)
+            del tmp[a]
 
-        begin = index + Lib.NUMBER_NOISE_SAMPLES
-        end = begin + int(Numpy.ceil(Lib.NUMBER_DATA_SAMPLES/40))
+        dataSignal = []
+        biggestIndex2 = Numpy.sort(biggestIndex)
+        for x in range(len(biggestIndex2)):
+            begin = biggestIndex2[x] + Lib.NUMBER_NOISE_SAMPLES
+            if x < len(biggestIndex2-2):
+                end = biggestIndex2[x+1]
+            else : end = len(record)
+            dataSignal = Numpy.concatenate([dataSignal, record[begin:end]])
 
-        return record[begin:end], end
+        return dataSignal
+        # begin = index + Lib.NUMBER_NOISE_SAMPLES
+        # end = begin + int(Numpy.ceil(Lib.NUMBER_DATA_SAMPLES / 40))
+        #
+        # return record[begin:end], end
 
     def projectSignalChunkOnBasis(self, signalChunk, sinus):
         resultArray = []
@@ -132,7 +148,8 @@ class Synthesizer:
                 f = Lib.LOWER_UPPER_FREQUENCY_BOUND + \
                     Lib.FREQUENCY_STEP * (i + 1)
 
-            sinus[i, :] = 100*Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
+            sinus[i, :] = 100 * \
+                Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
 
         # Compute the chunks corresponding to the vectors and project them on the basis.
         # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks

@@ -13,10 +13,10 @@ if __name__ == "__main__":
     print("Recording Signal")
     recording = synthesizer.recordSignal()
     print("Extracting Data Signal")
-    dataSignal, end = synthesizer.extractDataSignal(recording)
-    for i in range(39):
-        temp = synthesizer.extractDataSignal(recording[end:len(recording)])
-        dataSignal = Numpy.concatenate([dataSignal, temp])
+    dataSignal = synthesizer.extractDataSignal(recording)
+    # for i in range(39):
+    #     temp = synthesizer.extractDataSignal(recording[end:len(recording)])
+    #     dataSignal = Numpy.concatenate([dataSignal, temp])
     receivedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
     print(receivedVectors)
 
