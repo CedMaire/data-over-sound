@@ -13,7 +13,7 @@ if __name__ == "__main__":
     stringRead = io.readFile(Lib.FILENAME_READ)
 
     encodedVectors = coder.encode(stringRead)
-#   encodedVectors=encodedVectors[0:40]
+    encodedVectors=encodedVectors[0:40]
     print("ENCODED VECTORS:")
     print(encodedVectors)
 

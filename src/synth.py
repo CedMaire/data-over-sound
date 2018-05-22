@@ -12,6 +12,7 @@ class Synthesizer:
         pass
 
     def detectNoise(self):
+        return 2
         SoundDevice.default.channels = 1
         record = SoundDevice.rec(Lib.SAMPLES_PER_SEC * Lib.NOISE_DETECTION_TIME,
                                  Lib.SAMPLES_PER_SEC,
@@ -100,17 +101,17 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
-
+        """
         for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
                 maxDotProduct = dotProduct
                 index = i
-
-        begin = index + Lib.NUMBER_NOISE_SAMPLES + 15000 - 3354
+        """
+        begin = 320832#index + Lib.NUMBER_NOISE_SAMPLES + 44100
         end = begin + Lib.NUMBER_DATA_SAMPLES
-
+        print(begin)
         bla = record[begin:end]
         Plot.plot(1.5 * record)
         Plot.plot(Numpy.concatenate([Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
@@ -157,7 +158,7 @@ class Synthesizer:
                 separate.append(block)
                 block=[]
         separate.append(block)
-        flip=False
+        flip=True
         print(separate)
         counter=0
         """
@@ -186,31 +187,40 @@ class Synthesizer:
     def decodeSignalToBitVectors(self, signal, nonoise):
         # Compute the basis
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
-        sinus = Numpy.zeros([10, len(t)])
+        sinus = Numpy.zeros([4000, len(t)])
 
-        for i in range(0, 10):
+        for j in range(0, 4000):
             if (nonoise == 1):
                 f = Lib.LOWER_LOW_FREQUENCY_BOUND + \
-                    Lib.FREQUENCY_STEP * (i + 1)
+                    Lib.FREQUENCY_STEP
             else:
                 f = Lib.LOWER_UPPER_FREQUENCY_BOUND + \
-                    Lib.FREQUENCY_STEP * (i + 1)
+                    Lib.FREQUENCY_STEP
 
-            sinus[i, :] = Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC-i*Numpy.pi/36))
+            sinus[j, :] = Numpy.sin((((2*Numpy.pi*t*(f-j/4)/44100))))
 
         # Compute the chunks corresponding to the vectors and project them on the basis.
         # https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
         chunks = [signal[i:i + Lib.ELEMENTS_PER_CHUNK]
                   for i in range(0, len(signal), Lib.ELEMENTS_PER_CHUNK)]
-        i = 0
         resultArray=[]
-        dotArray=[]
-        for chunk in chunks:
-            dotProduct=Numpy.dot(sinus[0], chunk)
-            dotArray.append(Numpy.abs(dotProduct))
-            resultArray.append([1] if (dotProduct >= 0) else [0])
-            i += 1
-        Plot.plot(dotArray)
-        Plot.show()
-        resultArray=self.realDecode(dotArray,resultArray)
+        showdotarray=False
+        for k in range (0,4000):
+            dotArray=[]
+            for chunk in chunks:
+                dotProduct=Numpy.dot(sinus[k], chunk)
+                print(dotProduct)
+                dotArray.append(Numpy.abs(dotProduct))
+            for d in dotArray:
+                if d>20:
+                    showdotarray=True
+            if (showdotarray):
+                Plot.plot(dotArray)
+                Plot.show()
+                print(k)
+            #showdotarray=False
+            if(k%1000==0):
+                print(k,"/4000")
+        resultArray.append([1] if (dotProduct >= 0) else [0])
+        #resultArray=self.realDecode(dotArray,resultArray)
         return resultArray
