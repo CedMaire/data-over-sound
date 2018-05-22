@@ -92,10 +92,11 @@ class Synthesizer:
         noiseToSyncOn = self.createWhiteNoise()
 
         index = 0
+        tmp = {}
         for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
             dotProduct = Numpy.dot(
                 noiseToSyncOn, record[i:Lib.NUMBER_NOISE_SAMPLES + i])
-            tmp = {i, dotProduct}
+            tmp[i] = dotProduct
 
         biggestIndex = []
         for x in range (40):
