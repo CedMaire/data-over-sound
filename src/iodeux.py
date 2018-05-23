@@ -1,5 +1,5 @@
 import lib as Lib
-import numpy as np
+import os as OS
 
 
 class IODeux:
@@ -7,7 +7,10 @@ class IODeux:
         pass
 
     def readFile(self, fileName):
-        file = open(file=fileName, mode="r", encoding=Lib.UTF_8)
+        dirname, _ = OS.path.split(OS.path.abspath(__file__))
+        dirname += "/../"
+
+        file = open(file=dirname + fileName, mode="r", encoding=Lib.UTF_8)
         string = file.read()
         file.close()
 
@@ -17,7 +20,10 @@ class IODeux:
         return string
 
     def writeFile(self, fileName, string):
-        file = open(file=fileName, mode="w", encoding=Lib.UTF_8)
+        dirname, _ = OS.path.split(OS.path.abspath(__file__))
+        dirname += "/../"
+
+        file = open(file=dirname + fileName, mode="w", encoding=Lib.UTF_8)
         file.write(string)
         file.close()
 

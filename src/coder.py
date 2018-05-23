@@ -1,7 +1,7 @@
 import unireedsolomon as ReedSalomon
 import lib as Lib
-import mpmath as BigNumbers
-import numpy as np
+# import mpmath as BigNumbers
+import numpy as Numpy
 
 
 class Coder:
@@ -27,11 +27,11 @@ class Coder:
 
     # Checks if the received data is too long.
     def dataReceivedIsTooLong(self, length):
-        return length > Lib.NEEDED_AMOUNT_OF_VECTORS
+        return length > Lib.NEEDED_AMOUNT_OF_CHUNKS
 
     # Checks if the received data has the correct lenght.
     def dataReceivedHasRightLength(self, length):
-        return length == Lib.NEEDED_AMOUNT_OF_VECTORS
+        return length == Lib.NEEDED_AMOUNT_OF_CHUNKS
 
     # Encodes the string so that it can be sent as k bits at a time.
     def encode(self, string):
@@ -60,8 +60,8 @@ class Coder:
     # Chunks the 8-bit vectors into smaller vectors.
     def chunk(self, vectorList):
         # Chunk
-        chuncked = list(map(lambda vector: [vector[i:i + Lib.CHUNK_SIZE] for i in range(0, len(vector), Lib.CHUNK_SIZE)],
-                            vectorList))
+        chuncked = list(map(lambda vector: [vector[i:i + Lib.CHUNK_SIZE]
+                                            for i in range(0, len(vector), Lib.CHUNK_SIZE)], vectorList))
 
         # Flatten
         outputList = list()
@@ -120,7 +120,7 @@ class Coder:
     # "He" -> [[0, 1, 0, 0, 1, 0, 0, 0], [0, 1, 1, 0, 0, 1, 0, 1]]
     def stringToListOfByteVectors(self, string):
         tmp = list(
-            map(lambda x: bin(x)[2:], self.randomizeBytes(string.encode(Lib.UTF_8))))
+            map(lambda x: bin(x)[2:], self.randomizeBytes(string.encode(Lib.LATIN_1))))
 
         output = list()
         for e in tmp:
@@ -131,7 +131,7 @@ class Coder:
 
         for e in output:
             if len(e) < 8:
-                for i in range(8-len(e)):
+                for i in range(8 - len(e)):
                     e.insert(0, 0)
 
         return output
@@ -143,10 +143,10 @@ class Coder:
             map(lambda bitString: int(bitString, 2),
                 map(lambda vector: "".join(
                     map(lambda x: repr(x), vector)), byteVectors))))).decode(
-                        Lib.UNICODE_ESCAPE).encode(Lib.LATIN_1).decode(Lib.UTF_8)
+                        Lib.UNICODE_ESCAPE).encode(Lib.LATIN_1).decode(Lib.LATIN_1)
 
     # Creates a random array using a seed.
     def createRandomArray(self, array_size, seed, max_value):
-        np.random.seed(seed)
-        tmp = np.random.randint(max_value, size=(array_size))
+        Numpy.random.seed(seed)
+        tmp = Numpy.random.randint(max_value, size=(array_size))
         return tmp
