@@ -3,7 +3,7 @@ import lib as Lib
 import coder as Coder
 import synth as Synthesizer
 import numpy as Numpy
-
+import matplotlib.pyplot as Plot
 if __name__ == "__main__":
     io = IODeux.IODeux()
     coder = Coder.Coder()
@@ -12,12 +12,15 @@ if __name__ == "__main__":
     print("Detecting Noise")
     noNoise = synthesizer.detectNoise()
     print("Recording Signal")
-    recording = synthesizer.recordSignal()
-    Numpy.save("recording_40_22k", recording)
-    #recording = Numpy.load("recording_40_22k.npy")
+    #recording = synthesizer.recordSignal()
+    #Numpy.save("recording_80_22k", recording)
+    recording = Numpy.load("recording44.npy")
+    Plot.plot(recording)
+    Plot.show()
     print("Extracting Data Signal")
     dataSignal = synthesizer.extractDataSignal(recording)
-    receivedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
+    #receivedVectors = synthesizer.decodeSignalToBitVector(dataSignal, noNoise)
+    receivedVectors = synthesizer.Decodeur2LEspace(dataSignal, noNoise)
     print(receivedVectors)
 
     decodedTuple = coder.decode(receivedVectors)

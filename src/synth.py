@@ -117,17 +117,18 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
-
+        """
         for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
                 maxDotProduct = dotProduct
                 index = i
-
-        begin = index + Lib.NUMBER_NOISE_SAMPLES
+        """
+        #begin = index + Lib.NUMBER_NOISE_SAMPLES
+        begin=181815
         end = begin + Lib.NUMBER_DATA_SAMPLES
-        print(begin)
+
         bla = record[begin:end]
         Plot.plot(1.5 * record)
         Plot.plot(Numpy.concatenate([Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
@@ -236,14 +237,16 @@ class Synthesizer:
     '''
     def decodeSignalToBitVectors(self, signal, nonoise):
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
-        sinus = Numpy.zeros([10, len(t)])
+        sinus = Numpy.zeros([128, len(t)])
 
         if (nonoise == 1):
             f = Lib.LOWER_LOW_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
         else:
             f = Lib.LOWER_UPPER_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
-
-        sinus[0]=Numpy.sin(2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)
+        j=0
+        for i in range (128):
+            sinus[j]=Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)-1+i*0.05)
+            j=j+1
 
         #plot signal versus sin
         Plot.plot(0.1*Numpy.tile(sinus[0,:], [1,2])[0,:])
@@ -252,14 +255,82 @@ class Synthesizer:
         Plot.show()
 
         chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
+        dotArray=Numpy.zeros([chunks.shape[0],128])
+        i=0
+        for chunk in chunks:
+            dotArray[i,:]=chunk @ sinus.T
+            Plot.plot(dotArray[i,:])
+            Plot.show()
+            i=i+1
 
-        dotArray = chunks @ sinus[0,:]
-
-        Plot.plot(Numpy.abs(dotArray))
+        #Plot.plot(Numpy.abs(dotArray))
         #Plot.plot(Numpy.abs(Numpy.fft.fft(dotArray)))
-        Plot.show()
+        #Plot.show()
 
         resultArray=[]
-        for b in dotArray >= 0:
-            resultArray.append([1] if b else [0])
+        #for b in dotArray >= 0:
+        #    resultArray.append([1] if b else [0])
         return resultArray
+
+    def Decodeur2LEspace(self,signal,nonoise):
+        t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
+        sinus = Numpy.zeros([128, len(t)])
+
+        if (nonoise == 1):
+            f = Lib.LOWER_LOW_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
+        else:
+            f = Lib.LOWER_UPPER_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
+        j=0
+        for i in range (128):
+            sinus[j]=Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)-1.5+i*0.05)
+            j=j+1
+
+        #plot signal versus sin
+        Plot.plot(0.1*Numpy.tile(sinus[0,:], [1,2])[0,:])
+        Plot.plot(signal[:2*Lib.ELEMENTS_PER_CHUNK])
+        Plot.plot(Numpy.zeros(2*Lib.ELEMENTS_PER_CHUNK))
+        Plot.show()
+
+        chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
+        dotArray=Numpy.zeros([chunks.shape[0],128])
+        i=0
+        resultArray=[]
+        currphase=0
+        for chunk in chunks:
+            dotArray[i,:]=chunk @ sinus.T
+            #Plot.plot(dotArray[i,:])
+            #Plot.show()
+            #!! And here starts the fun !!
+            min=0
+            max=0
+            jmax=None
+            jmin=None
+            line=len(dotArray[i])
+            for j in range(128):
+                if (dotArray[i][j]>max):
+                    max=dotArray[i][j]
+                    jmax=j
+                elif (dotArray[i][j]<min):
+                    min=dotArray[i][j]
+                    jmin=j
+            print(max,jmax,min,jmin)
+            jdistmin=self.findClosestIndex(currphase,jmin,jmax)
+            if (dotArray[i][jdistmin]<0):
+                resultArray.append([0])
+                currphase=jdistmin
+            else:
+                resultArray.append([1])
+                currphase=jdistmin
+            print(currphase)
+        i=i+1
+        return resultArray
+
+    def findClosestIndex(self,j0,j1,j2):
+        d1=Numpy.abs(j1-j0)
+        if(d1>64):
+            d1=128-d1
+        d2=Numpy.abs(j2-j0)
+        print("debug", "j0",j0,"j1",j1,"j2",j2,"d1",d1,"d2",d2)
+        if(d2>64):
+            d2=128-d2
+        return j1 if d1<d2 else j2
