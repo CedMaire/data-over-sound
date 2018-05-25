@@ -12,7 +12,7 @@ class Synthesizer:
         pass
 
     def detectNoise(self):
-        return 2
+        return 2 # deal with it
         SoundDevice.default.channels = 1
         record = SoundDevice.rec(Lib.SAMPLES_PER_SEC * Lib.NOISE_DETECTION_TIME,
                                  Lib.SAMPLES_PER_SEC,
@@ -36,7 +36,7 @@ class Synthesizer:
 
         return Numpy.random.normal(0, 1, Lib.NUMBER_NOISE_SAMPLES)
 
-    def generateCompleteSignal(self, array, nonoise):
+    '''def generateCompleteSignal(self, array, nonoise):
         signal = Numpy.zeros(0)
 
         savedSignalDict = {}
@@ -55,9 +55,21 @@ class Synthesizer:
                 print("Prepare your ears !")
             i = i + 1
 
-        return signal
+        return signal'''
 
-    def computeFrequencies(self, vector, lowerFrequencyBound):
+    def generateCompleteSignal(self, array, nonoise):
+        sin0 = self.generateVectorSignal(Numpy.array([0]), nonoise)
+        sin1 = self.generateVectorSignal(Numpy.array([1]), nonoise)
+        Plot.plot(sin0)
+        Plot.plot(sin1)
+        Plot.show()
+        sins = Numpy.zeros([2,len(sin0)])
+        sins[0,:]=sin0
+        sins[1,:]=sin1# c'est moche mais c'est pour matcher avec votre truc
+        return sins[array,:].reshape([-1])
+
+
+    '''def computeFrequencies(self, vector, lowerFrequencyBound):
         frequencies = []
 
         for i in range(0, Lib.CHUNK_SIZE):
@@ -68,6 +80,10 @@ class Synthesizer:
                 frequencies.append(-(lowerFrequencyBound +
                                      Lib.FREQUENCY_STEP * (i + 1)))
 
+        return frequencies'''
+    def computeFrequencies(self, vector, lowerFrequencyBound):
+        frequencies = Numpy.ones(vector.shape) * lowerFrequencyBound + Lib.FREQUENCY_STEP
+        frequencies[vector == 0] = -1*frequencies[vector == 0]
         return frequencies
 
     def generateVectorSignal(self, vector, nonoise):
@@ -101,8 +117,8 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
-        """
-        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+
+        '''for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
@@ -184,7 +200,7 @@ class Synthesizer:
                 print(s, resultArray[s[0]], encodedVectors[s[0]], dotArray[s[0]])
         return resultArray
 
-    def decodeSignalToBitVectors(self, signal, nonoise):
+    '''def decodeSignalToBitVectors(self, signal, nonoise):
         # Compute the basis
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
         sinus = Numpy.zeros([4000, len(t)])
@@ -204,23 +220,47 @@ class Synthesizer:
         chunks = [signal[i:i + Lib.ELEMENTS_PER_CHUNK]
                   for i in range(0, len(signal), Lib.ELEMENTS_PER_CHUNK)]
         resultArray=[]
-        showdotarray=False
-        for k in range (0,4000):
-            dotArray=[]
-            for chunk in chunks:
-                dotProduct=Numpy.dot(sinus[k], chunk)
-                print(dotProduct)
-                dotArray.append(Numpy.abs(dotProduct))
-            for d in dotArray:
-                if d>20:
-                    showdotarray=True
-            if (showdotarray):
-                Plot.plot(dotArray)
-                Plot.show()
-                print(k)
-            #showdotarray=False
-            if(k%1000==0):
-                print(k,"/4000")
-        resultArray.append([1] if (dotProduct >= 0) else [0])
+        dotArray=[]
+        for chunk in chunks:
+            dotProduct=Numpy.dot(sinus[0], chunk)
+            dotArray.append(Numpy.abs(dotProduct))
+            resultArray.append([1] if (dotProduct >= 0) else [0])
+            i += 1
+        #Plot.plot(dotArray)
+        Plot.plot(Numpy.fft.fftfreq(len(dotArray), 1/44100),Numpy.fft.fft(dotArray))
+        Plot.show()
         #resultArray=self.realDecode(dotArray,resultArray)
+        return resultArray'''
+
+    def decodeSignalToBitVectors(self, signal, nonoise):
+        t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
+        sinus = Numpy.zeros([10, len(t)])
+
+        for i in range(0, 10):
+            if (nonoise == 1):
+                f = Lib.LOWER_LOW_FREQUENCY_BOUND + \
+                    Lib.FREQUENCY_STEP * (i + 1)
+            else:
+                f = Lib.LOWER_UPPER_FREQUENCY_BOUND + \
+                    Lib.FREQUENCY_STEP * (i + 1)
+
+            sinus[i, :] = Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC-i*Numpy.pi/36))
+
+        #plot signal versus sin
+        Plot.plot(0.1*Numpy.tile(sinus[0,:], [1,2])[0,:])
+        Plot.plot(signal[:2*Lib.ELEMENTS_PER_CHUNK])
+        Plot.plot(Numpy.zeros(2*Lib.ELEMENTS_PER_CHUNK))
+        Plot.show()
+
+        chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
+
+        dotArray = chunks @ sinus[0,:]
+
+        Plot.plot(Numpy.abs(dotArray))
+        #Plot.plot(Numpy.abs(Numpy.fft.fft(dotArray)))
+        Plot.show()
+
+        resultArray=[]
+        for b in dotArray >= 0:
+            resultArray.append([1] if b else [0])
         return resultArray
