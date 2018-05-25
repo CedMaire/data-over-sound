@@ -118,14 +118,14 @@ class Synthesizer:
         maxDotProduct = 0
         index = 0
 
-        '''for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
                 maxDotProduct = dotProduct
                 index = i
-        """
-        begin = 320832#index + Lib.NUMBER_NOISE_SAMPLES + 44100
+
+        begin = index + Lib.NUMBER_NOISE_SAMPLES
         end = begin + Lib.NUMBER_DATA_SAMPLES
         print(begin)
         bla = record[begin:end]
@@ -158,6 +158,7 @@ class Synthesizer:
         resultArray.append(1 if (dotProduct >= 0) else 0)
         return resultArray
 
+    '''
     def realDecode(self, dotArray,resultArray):
         print(len(resultArray), len(dotArray))
         index=Numpy.ndarray.tolist(Numpy.arange(len(dotArray)))
@@ -177,9 +178,7 @@ class Synthesizer:
         flip=True
         print(separate)
         counter=0
-        """
-        TEST
-        """
+
         io = IODeux.IODeux()
         coder = Coder.Coder()
         stringRead = io.readFile(Lib.FILENAME_READ)
@@ -200,7 +199,9 @@ class Synthesizer:
                 print(s, resultArray[s[0]], encodedVectors[s[0]], dotArray[s[0]])
         return resultArray
 
-    '''def decodeSignalToBitVectors(self, signal, nonoise):
+    '''
+    '''
+    def decodeSignalToBitVectors(self, signal, nonoise):
         # Compute the basis
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
         sinus = Numpy.zeros([4000, len(t)])
@@ -230,21 +231,19 @@ class Synthesizer:
         Plot.plot(Numpy.fft.fftfreq(len(dotArray), 1/44100),Numpy.fft.fft(dotArray))
         Plot.show()
         #resultArray=self.realDecode(dotArray,resultArray)
-        return resultArray'''
+        return resultArray
 
+    '''
     def decodeSignalToBitVectors(self, signal, nonoise):
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
         sinus = Numpy.zeros([10, len(t)])
 
-        for i in range(0, 10):
-            if (nonoise == 1):
-                f = Lib.LOWER_LOW_FREQUENCY_BOUND + \
-                    Lib.FREQUENCY_STEP * (i + 1)
-            else:
-                f = Lib.LOWER_UPPER_FREQUENCY_BOUND + \
-                    Lib.FREQUENCY_STEP * (i + 1)
+        if (nonoise == 1):
+            f = Lib.LOWER_LOW_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
+        else:
+            f = Lib.LOWER_UPPER_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
 
-            sinus[i, :] = Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC-i*Numpy.pi/36))
+        sinus[0]=Numpy.sin(2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)
 
         #plot signal versus sin
         Plot.plot(0.1*Numpy.tile(sinus[0,:], [1,2])[0,:])
