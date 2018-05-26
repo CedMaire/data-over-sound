@@ -20,7 +20,7 @@ if __name__ == "__main__":
     print("Extracting Data Signal")
     dataSignal = synthesizer.extractDataSignal(recording)
     #receivedVectors = synthesizer.decodeSignalToBitVector(dataSignal, noNoise)
-    receivedVectors = synthesizer.Decodeur2LEspace(dataSignal, noNoise)
+    receivedVectors = synthesizer.decodeur2LEspace(dataSignal, noNoise)
     print(receivedVectors)
 
     decodedTuple = coder.decode(receivedVectors)
