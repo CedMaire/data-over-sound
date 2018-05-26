@@ -32,5 +32,4 @@ if __name__ == "__main__":
         io.writeFile(Lib.FILENAME_WRITE, decodedString)
         print("Done!")
     else:
-        # Try to flip the bits?
         print(decodedTuple[1])
