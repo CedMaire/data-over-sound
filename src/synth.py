@@ -88,15 +88,21 @@ class Synthesizer:
 
     def generateVectorSignal(self, vector, nonoise):
         # Compute the frequencies
-        freqs = self.computeFrequencies(vector, Lib.LOWER_LOW_FREQUENCY_BOUND) if (nonoise == 1) \
+        """
+            freqs = self.computeFrequencies(vector, Lib.LOWER_LOW_FREQUENCY_BOUND) if (nonoise == 1) \
             else self.computeFrequencies(vector, Lib.LOWER_UPPER_FREQUENCY_BOUND)
-
-        # Prepare the sinuses
+        """
+        f=1500 if nonoise==1 else 2500
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
         signal = Numpy.zeros(t.shape)
-
-        for f in freqs:
-            signal = signal + Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
+        if(vector[0]==1):
+            signal=signal+Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
+        if(vector[0]==0):
+            signal=signal+Numpy.sin(2 * Numpy.pi * t * (-f) / Lib.SAMPLES_PER_SEC)
+        if(vector[1]==1):
+            signal=signal+Numpy.cos(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
+        if(vector[1]==0):
+            signal=signal+Numpy.cos(2 * Numpy.pi * t * (-f) / Lib.SAMPLES_PER_SEC)
 
         return signal
 
