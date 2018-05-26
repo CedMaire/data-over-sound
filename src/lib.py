@@ -1,5 +1,6 @@
 DECODING_FAILED = "Decoding failed."
 DECODING_NOT_READY = "Decoding not ready."
+FLIPPING_THE_BITS = "Trying to decode by flipping all the bits."
 
 # Encodings
 UTF_8 = "utf-8"

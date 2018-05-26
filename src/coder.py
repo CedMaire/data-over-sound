@@ -55,6 +55,20 @@ class Coder:
         except:
             print(Lib.DECODING_FAILED)
 
+        if (not isDecoded):
+            print(Lib.FLIPPING_THE_BITS)
+            flippedTupleList = self.flipAllTheBits(tupleList)
+            print(flippedTupleList)
+
+            try:
+                assembledVectorsList = self.assemble(flippedTupleList)
+                stringReceived = self.listOfByteVectorsToString(
+                    assembledVectorsList)
+                output = self.recoverEcc(stringReceived)
+                isDecoded = True
+            except:
+                print(Lib.DECODING_FAILED)
+
         return (isDecoded, output)
 
     # Chunks the 8-bit vectors into smaller vectors.
@@ -136,7 +150,7 @@ class Coder:
 
         return output
 
-    # Converts a list of 8-bit vectors to a regular string (with accents).
+    # Converts a list of 8-bit vectors to a regular string.
     # [[0, 1, 0, 0, 1, 0, 0, 0], [0, 1, 1, 0, 0, 1, 0, 1]] -> "He"
     def listOfByteVectorsToString(self, byteVectors):
         return self.recoverBytes(bytes(list(
@@ -150,3 +164,8 @@ class Coder:
         Numpy.random.seed(seed)
         tmp = Numpy.random.randint(max_value, size=(array_size))
         return tmp
+
+    # Flips all the bits in a list of bit vectors.
+    def flipAllTheBits(self, vectorList):
+        return Numpy.reshape(Numpy.vectorize(lambda x: 1 if (x == 0) else 0)(
+            Numpy.ndarray.flatten(Numpy.asarray(vectorList))), (Lib.NEEDED_AMOUNT_OF_VECTORS, Lib.CHUNK_SIZE)).tolist()
