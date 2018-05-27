@@ -23,7 +23,7 @@ if __name__ == "__main__":
     noiseStart = synthesizer.createWhiteNoise()
     noiseEnd = synthesizer.createWhiteNoise()
 
-    noNoise = 1  # CHANGE AS YOU WANT BETWEEN {1, 2}
+    noNoise = 2  # CHANGE AS YOU WANT BETWEEN {1, 2}
     noiseMiddle = None
     if(noNoise == 2):
         noiseMiddle = noise.generateBandLimitedNoise(
@@ -39,14 +39,13 @@ if __name__ == "__main__":
             Lib.SAMPLES_PER_SEC) * 100
 
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
-
     # Send
     signalToSend = Numpy.concatenate(
-        [noiseStart, signalToSend + noiseMiddle, noiseEnd])
+        [noiseStart, signalToSend , noiseEnd])
 
     # Receive
     dataSignal = synthesizer.extractDataSignal(signalToSend)
-    receivedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
+    receivedVectors = synthesizer.decodeur2LEspace(dataSignal, noNoise)
     print("RECEIVED VECTORS:")
     print(receivedVectors)
 
