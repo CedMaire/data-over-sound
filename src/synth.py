@@ -149,10 +149,9 @@ class Synthesizer:
             f = Lib.LOWER_LOW_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
         else:
             f = Lib.LOWER_UPPER_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
-        j=0
+
         for i in range (phaseSeeker):
-            sinus[j]=Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)-1.5+i*0.05)
-            j=j+1
+            sinus[i]=Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)-1.5+i*0.05)
 
         #plot signal versus sin
         #Plot.plot(0.1*Numpy.tile(sinus[0,:], [1,2])[0,:])
@@ -167,8 +166,8 @@ class Synthesizer:
         currphase=0
         for chunk in chunks:
             dotArray[i,:]=chunk @ sinus.T
-            #Plot.plot(dotArray[i,:])
-            #Plot.show()
+            Plot.plot(dotArray[i,:])
+            Plot.show()
             #!! And here starts the fun !!
             min=0
             max=0
