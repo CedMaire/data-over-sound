@@ -38,6 +38,13 @@ class Synthesizer:
         return Numpy.random.normal(0, 1, Lib.NUMBER_NOISE_SAMPLES)
 
     def generateCompleteSignal(self, array, nonoise):
+        # numberofbits = 8
+        # sig00 = self.generateVectorSignal(Numpy.array([0]), nonoise)
+        # sins=  Numpy.zeros([2*numberofbits, len(sig00)])
+        # sins[0,:]=sig00
+        #
+        # for i in range(1, numberofbits):
+        #     sins[i,:]=self.generateVectorSignal(Numpy.array([i]), nonoise)
         sig00 = self.generateVectorSignal(Numpy.array([0]), nonoise)
         sig01 = self.generateVectorSignal(Numpy.array([1]), nonoise)
         sins = Numpy.zeros([2,len(sig00)])
@@ -117,21 +124,33 @@ class Synthesizer:
                     jmin=j
             jdistmin=self.findClosestIndex(currphase,jmin,jmax,phaseSeeker)
             if (dotArray[i][jdistmin]<0):
-                resultArray[i]=np.vstack([0])
+                resultArray[i]=(0)
             else:
-                resultArray[i]=np.vstack([1])
+                resultArray[i]=(1)
             currphase=jdistmin
             i=i+1
+
+        print("resultArray",resultArray)
+        print("len(resultArray)",len(resultArray))
         return resultArray
 
     def decodeAllFreqs(self,signal,nonoise):
         f= np.copy(Lib.f1) if nonoise==1 else np.copy(Lib.f2)
-        results=np.zeros(Lib.NEEDED_AMOUNT_OF_VECTORS,)
+        results=np.zeros((Lib.CHUNK_SIZE, Lib.NEEDED_AMOUNT_OF_VECTORS))
+        print((Lib.NEEDED_AMOUNT_OF_VECTORS))
         for i in range(Lib.CHUNK_SIZE):
+            print(i)
             results[i,:]=self.decodeur2LEspace(signal,f[i])
         #return r_[     ]
-        print(results.reshape(len(results),1,1))
-        print(results.shape)
+        #results = np.hstack(results[0], results[1])
+        print("results.shape1", results.shape)
+        results=list(map(lambda x : list(map(lambda y: int(y),x )), results.reshape(len(results[0]),1).tolist()))
+        #print("results.shape2", results.shape)
+
+        # for i in range(len(results)):
+        #     results[i] = np.array([results[i]])
+        print("results", results)
+        # np.d
         return results
 
 
