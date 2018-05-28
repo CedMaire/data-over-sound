@@ -99,11 +99,6 @@ class Synthesizer:
             signal=signal+Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
         if(vector[0]==0):
             signal=signal+Numpy.sin(2 * Numpy.pi * t * (-f) / Lib.SAMPLES_PER_SEC)
-        if(vector[1]==1):
-            signal=signal+Numpy.cos(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
-        if(vector[1]==0):
-            signal=signal+Numpy.cos(2 * Numpy.pi * t * (-f) / Lib.SAMPLES_PER_SEC)
-
         return signal
 
     def recordSignal(self):
@@ -173,7 +168,6 @@ class Synthesizer:
             max=0
             jmax=None
             jmin=None
-            line=len(dotArray[i])
             for j in range(phaseSeeker):
                 if (dotArray[i][j]>max):
                     max=dotArray[i][j]
