@@ -1,3 +1,4 @@
+import numpy as np
 DECODING_FAILED = "Decoding failed."
 DECODING_NOT_READY = "Decoding not ready."
 FLIPPING_THE_BITS = "Trying to decode by flipping all the bits."
@@ -11,6 +12,9 @@ UNICODE_ESCAPE = "unicode_escape"
 FILENAME_READ = "input.txt"
 FILENAME_WRITE = "output.txt"
 
+#Freqs
+f1=np.array([1500])
+f2=np.array([2500])
 # Encoder
 BYTE_ENDIANESS = "big"
 BYTE_BIT_SIZE = 8
@@ -18,7 +22,7 @@ BYTE_DIFF_VALUES = 256
 BIG_PRIME_NUMBER = 32416190071
 CODE_WORD_LENGTH = 255
 MESSAGE_LENGTH = 180  # MODIFIABLE
-CHUNK_SIZE = 2  # MODIFIABLE
+CHUNK_SIZE = 1  # MODIFIABLE
 NEEDED_AMOUNT_OF_VECTORS = (CODE_WORD_LENGTH * int(BYTE_BIT_SIZE / CHUNK_SIZE))
 
 BYTE_RANGE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,

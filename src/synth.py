@@ -4,6 +4,7 @@ import matplotlib.pyplot as Plot
 import iodeux as IODeux
 import lib as Lib
 import coder as Coder
+import numpy as np
 # import noisedeux as Noise
 
 
@@ -37,42 +38,23 @@ class Synthesizer:
         return Numpy.random.normal(0, 1, Lib.NUMBER_NOISE_SAMPLES)
 
     def generateCompleteSignal(self, array, nonoise):
-        sig00 = self.generateVectorSignal(Numpy.array([0,0]), nonoise)
-        sig01 = self.generateVectorSignal(Numpy.array([0,1]), nonoise)
-        sig10 = self.generateVectorSignal(Numpy.array([1,0]), nonoise)
-        sig11 = self.generateVectorSignal(Numpy.array([1,1]), nonoise)
-        sins = Numpy.zeros([4,len(sig00)])
+        sig00 = self.generateVectorSignal(Numpy.array([0]), nonoise)
+        sig01 = self.generateVectorSignal(Numpy.array([1]), nonoise)
+        sins = Numpy.zeros([2,len(sig00)])
         sins[0,:]=sig00
         sins[1,:]=sig01# c'est moche mais c'est pour matcher avec votre truc
-        sins[2,:]=sig10
-        sins[3,:]=sig11
         array = Numpy.array(array)
-        return sins[array[:,0]*2+array[:,1],:].reshape([-1])
+        return sins[array,:].reshape([-1]) #va falloir hardcoder pour augmenter la dimension...
 
-    def computeFrequencies(self, vector, lowerFrequencyBound):
-        frequencies = Numpy.ones(vector.shape) * lowerFrequencyBound + Lib.FREQUENCY_STEP
-        frequencies[vector == 0] = -1*frequencies[vector == 0]
-        return frequencies
 
     def generateVectorSignal(self, vector, nonoise):
-        # Compute the frequencies
-        """
-            freqs = self.computeFrequencies(vector, Lib.LOWER_LOW_FREQUENCY_BOUND) if (nonoise == 1) \
-            else self.computeFrequencies(vector, Lib.LOWER_UPPER_FREQUENCY_BOUND)
-        """
-        f=1500 if nonoise==1 else 2500
-        t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
-        signal = Numpy.zeros(t.shape)
-        if(vector[0]==1):
-            signal=signal+Numpy.sin(2 * Numpy.pi * t * 2053 / Lib.SAMPLES_PER_SEC)
-        if(vector[0]==0):
-            signal=signal+Numpy.sin(2 * Numpy.pi * t * (-2053) / Lib.SAMPLES_PER_SEC)
-        if(vector[1]==1):
-            signal=signal+Numpy.sin(2 * Numpy.pi * t * 2927 / Lib.SAMPLES_PER_SEC)
-        if(vector[1]==0):
-            signal=signal+Numpy.sin(2 * Numpy.pi * t * (-2927) / Lib.SAMPLES_PER_SEC)
-
-        return signal
+        f = np.copy(Lib.f1) if nonoise==1 else np.copy(Lib.f2)
+        for i in range(len(vector)):
+            if (vector[i]==0):
+                f[i]=-f[i]
+        t = np.arange(Lib.ELEMENTS_PER_CHUNK)
+        sin = np.sum(np.sin(2 * np.pi * t[np.newaxis,:] * f[:,np.newaxis] / Lib.SAMPLES_PER_SEC), axis=0)
+        return sin
 
     def recordSignal(self):
         SoundDevice.default.channels = 1
@@ -108,85 +90,50 @@ class Synthesizer:
 
         return bla
 
-    def decodeur2LEspace(self,signal,nonoise):
+    def decodeur2LEspace(self,signal,f):
         phaseSeeker=128
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
         sinus = Numpy.zeros([phaseSeeker, len(t)])
-        cosinus = Numpy.zeros([phaseSeeker, len(t)])
-
-        if (nonoise == 1):
-            f = Lib.LOWER_LOW_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
-        else:
-            f = Lib.LOWER_UPPER_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
-        j=0
         for i in range (phaseSeeker):
-            sinus[j]=Numpy.sin((2*Numpy.pi*t*2053/Lib.SAMPLES_PER_SEC)-1.5+i*0.05)
-            cosinus[j]=Numpy.sin((2*Numpy.pi*t*2923/Lib.SAMPLES_PER_SEC)-1.5+i*0.05)
-            j=j+1
-
-        #plot signal versus sin
-        #Plot.plot(0.1*Numpy.tile(sinus[0,:], [1,2])[0,:])
-        #Plot.plot(signal[:2*Lib.ELEMENTS_PER_CHUNK])
-        #Plot.plot(Numpy.zeros(2*Lib.ELEMENTS_PER_CHUNK))
-        #Plot.show()
-        print (signal.shape)
+            sinus[i]=Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)-1.5+i*0.05)
         chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
-        dotArraySin=Numpy.zeros([chunks.shape[0],phaseSeeker])
-        dotArrayCos=Numpy.zeros([chunks.shape[0],phaseSeeker])
+        dotArray=Numpy.zeros([chunks.shape[0],phaseSeeker])
         i=0
-        resultArray=[]
-        currphaseSin=0
-        currphaseCos=30
+        resultArray=np.zeros(int(Lib.NEEDED_AMOUNT_OF_VECTORS/Lib.CHUNK_SIZE))
+        currphase=0
         for chunk in chunks:
-            dotArraySin[i,:]=chunk @ sinus.T
-            dotArrayCos[i,:]=chunk @ cosinus.T
-            #Plot.plot(dotArraySin[i,:])
-            #Plot.show()
-            #Plot.plot(dotArrayCos[i,:])
-            #Plot.show()
+            dotArray[i,:]=chunk @ sinus.T
             #!! And here starts the fun !!
-            minSin=0
-            maxSin=0
-            jmaxSin=None
-            jminSin=None
-            minCos=0
-            maxCos=0
-            jmaxCos=None
-            jminCos=None
+            min=0
+            max=0
+            jmax=None
+            jmin=None
             for j in range(phaseSeeker):
-                if (dotArraySin[i][j]>maxSin):
-                    maxSin=dotArraySin[i][j]
-                    jmaxSin=j
-                elif (dotArraySin[i][j]<minSin):
-                    minSin=dotArraySin[i][j]
-                    jminSin=j
-                if (dotArrayCos[i][j]>maxCos):
-                    maxCos=dotArrayCos[i][j]
-                    jmaxCos=j
-                elif (dotArrayCos[i][j]<minCos):
-                    minCos=dotArrayCos[i][j]
-                    jminCos=j
-            jdistminSin=self.findClosestIndex(currphaseSin,jminSin,jmaxSin,phaseSeeker)
-            jdistminCos=self.findClosestIndex(currphaseCos,jminCos,jmaxCos,phaseSeeker)
-            vect=[]
-            if (dotArraySin[i][jdistminSin]<0):
-                vect.append(0)
-                currphaseSin=jdistminSin
+                if (dotArray[i][j]>max):
+                    max=dotArray[i][j]
+                    jmax=j
+                elif (dotArray[i][j]<min):
+                    min=dotArray[i][j]
+                    jmin=j
+            jdistmin=self.findClosestIndex(currphase,jmin,jmax,phaseSeeker)
+            if (dotArray[i][jdistmin]<0):
+                resultArray[i]=np.vstack([0])
             else:
-                vect.append(1)
-                currphaseSin=jdistminSin
-            if (dotArrayCos[i][jdistminCos]<0):
-                vect.append(0)
-                currphaseCos=jdistminCos
-            else:
-                vect.append(1)
-                currphaseCos=jdistminCos
-            print("currphaseSin",currphaseSin)
-            print("currphaseCos",currphaseCos)
-            print(vect)
-            resultArray.append(vect)
-        i=i+1
+                resultArray[i]=np.vstack([1])
+            currphase=jdistmin
+            i=i+1
         return resultArray
+
+    def decodeAllFreqs(self,signal,nonoise):
+        f= np.copy(Lib.f1) if nonoise==1 else np.copy(Lib.f2)
+        results=np.zeros(Lib.NEEDED_AMOUNT_OF_VECTORS,)
+        for i in range(Lib.CHUNK_SIZE):
+            results[i,:]=self.decodeur2LEspace(signal,f[i])
+        #return r_[     ]
+        print(results.reshape(len(results),1,1))
+        print(results.shape)
+        return results
+
 
     def findClosestIndex(self,j0,j1,j2,phaseSeeker):
         d1=Numpy.abs(j1-j0)
