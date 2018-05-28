@@ -130,26 +130,26 @@ class Synthesizer:
             currphase=jdistmin
             i=i+1
 
-        print("resultArray",resultArray)
-        print("len(resultArray)",len(resultArray))
+        #print("resultArray",resultArray)
+        #print("len(resultArray)",len(resultArray))
         return resultArray
 
     def decodeAllFreqs(self,signal,nonoise):
         f= np.copy(Lib.f1) if nonoise==1 else np.copy(Lib.f2)
         results=np.zeros((Lib.CHUNK_SIZE, Lib.NEEDED_AMOUNT_OF_VECTORS))
-        print((Lib.NEEDED_AMOUNT_OF_VECTORS))
+        #print((Lib.NEEDED_AMOUNT_OF_VECTORS))
         for i in range(Lib.CHUNK_SIZE):
             print(i)
             results[i,:]=self.decodeur2LEspace(signal,f[i])
         #return r_[     ]
         #results = np.hstack(results[0], results[1])
-        print("results.shape1", results.shape)
+        #print("results.shape1", results.shape)
         results=list(map(lambda x : list(map(lambda y: int(y),x )), results.reshape(len(results[0]),1).tolist()))
         #print("results.shape2", results.shape)
 
         # for i in range(len(results)):
         #     results[i] = np.array([results[i]])
-        print("results", results)
+        #print("results", results)
         # np.d
         return results
 
