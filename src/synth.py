@@ -124,9 +124,9 @@ class Synthesizer:
                 maxDotProduct = dotProduct
                 index = i
 
-        begin = index + Lib.NUMBER_NOISE_SAMPLES
+        begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
         #begin=181815
-        end = begin + Lib.NUMBER_DATA_SAMPLES
+        end = begin + int(Lib.NUMBER_DATA_SAMPLES)
 
         bla = record[begin:end]
         Plot.plot(1.5 * record)
@@ -161,8 +161,8 @@ class Synthesizer:
         currphase=0
         for chunk in chunks:
             dotArray[i,:]=chunk @ sinus.T
-            Plot.plot(dotArray[i,:])
-            Plot.show()
+            #Plot.plot(dotArray[i,:])
+            #Plot.show()
             #!! And here starts the fun !!
             min=0
             max=0
