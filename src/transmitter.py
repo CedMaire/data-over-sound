@@ -27,6 +27,5 @@ if __name__ == "__main__":
 
     start_time = time.time()
     SoundDevice.play(signalToSend, Lib.SAMPLES_PER_SEC, blocking=True)
-    SoundDevice.wait
     elapsed_time = time.time() - start_time
     print("Elapsed time for sound (everything) : ", elapsed_time)
