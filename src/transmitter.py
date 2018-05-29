@@ -4,6 +4,7 @@ import coder as Coder
 import synth as Synthesizer
 import sounddevice as SoundDevice
 import numpy as Numpy
+import time
 
 if __name__ == "__main__":
     io = IODeux.IODeux()
@@ -24,4 +25,7 @@ if __name__ == "__main__":
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
     signalToSend = Numpy.concatenate([synchNoise,signalToSend])
 
+    start_time = time.time()
     SoundDevice.play(signalToSend, Lib.SAMPLES_PER_SEC, blocking=True)
+    elapsed_time = time.time() - start_time
+    print("Time of noise (everything) : ",elapsed_time)
