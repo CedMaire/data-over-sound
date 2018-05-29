@@ -57,7 +57,7 @@ class Synthesizer:
         sins[2,:]= sig10
         sins[3,:]= sig11# c'est moche mais c'est pour matcher avec votre truc
         array = Numpy.array(array)
-        return sins[array,:].reshape([-1]) #va falloir hardcoder pour augmenter la dimension...
+        return sins[array[:,0]*2+array[:,1],:].reshape([-1]) #va falloir hardcoder pour augmenter la dimension...
 
 
     def generateVectorSignal(self, vector, nonoise):
@@ -112,7 +112,7 @@ class Synthesizer:
         chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
         dotArray=Numpy.zeros([chunks.shape[0],phaseSeeker])
         i=0
-        resultArray=np.zeros(int(Lib.NEEDED_AMOUNT_OF_VECTORS/Lib.CHUNK_SIZE))
+        resultArray=np.zeros(int(Lib.NEEDED_AMOUNT_OF_VECTORS))
         currphase=0
         for chunk in chunks:
             dotArray[i,:]=chunk @ sinus.T
@@ -148,10 +148,10 @@ class Synthesizer:
             # print(i)
             results[i,:]=self.decodeur2LEspace(signal,f[i])
         #return r_[     ]
-        results = np.dstack(results[0], results[1])
-        print("results.shape1", results.shape)
+        results = np.dstack((results[0], results[1]))
+        print(results)
 
-        results=list(map(lambda x : list(map(lambda y: int(y),x )), results.reshape(len(results[0]),1).tolist()))
+        results=list(map(lambda x : list(map(lambda y: int(y),x )), results.reshape(1020,2).tolist()))
         #print("results.shape2", results.shape)
 
         # for i in range(len(results)):
