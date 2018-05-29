@@ -45,11 +45,17 @@ class Synthesizer:
         #
         # for i in range(1, numberofbits):
         #     sins[i,:]=self.generateVectorSignal(Numpy.array([i]), nonoise)
-        sig00 = self.generateVectorSignal(Numpy.array([0]), nonoise)
-        sig01 = self.generateVectorSignal(Numpy.array([1]), nonoise)
-        sins = Numpy.zeros([2,len(sig00)])
+        sig00 = self.generateVectorSignal(Numpy.array([0, 0]), nonoise)
+        sig01 = self.generateVectorSignal(Numpy.array([0, 1]), nonoise)
+        sig10 = self.generateVectorSignal(Numpy.array([1, 0]), nonoise)
+        sig11 = self.generateVectorSignal(Numpy.array([1, 1]), nonoise)
+
+        sins = Numpy.zeros([4,len(sig00)])
+        # sins[array[:,0]*2+array[:,1],:].reshape([-1])
         sins[0,:]=sig00
-        sins[1,:]=sig01# c'est moche mais c'est pour matcher avec votre truc
+        sins[1,:]=sig01
+        sins[2,:]= sig10
+        sins[3,:]= sig11# c'est moche mais c'est pour matcher avec votre truc
         array = Numpy.array(array)
         return sins[array,:].reshape([-1]) #va falloir hardcoder pour augmenter la dimension...
 
@@ -139,11 +145,12 @@ class Synthesizer:
         results=np.zeros((Lib.CHUNK_SIZE, Lib.NEEDED_AMOUNT_OF_VECTORS))
         #print((Lib.NEEDED_AMOUNT_OF_VECTORS))
         for i in range(Lib.CHUNK_SIZE):
-            print(i)
+            # print(i)
             results[i,:]=self.decodeur2LEspace(signal,f[i])
         #return r_[     ]
-        #results = np.hstack(results[0], results[1])
-        #print("results.shape1", results.shape)
+        results = np.dstack(results[0], results[1])
+        print("results.shape1", results.shape)
+
         results=list(map(lambda x : list(map(lambda y: int(y),x )), results.reshape(len(results[0]),1).tolist()))
         #print("results.shape2", results.shape)
 
