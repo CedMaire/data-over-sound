@@ -10,6 +10,8 @@ if __name__ == "__main__":
     io = IODeux.IODeux()
     coder = Coder.Coder()
     synthesizer = Synthesizer.Synthesizer()
+    stringRead = io.readFile(Lib.FILENAME_READ)
+    encodedVectors = coder.encode(stringRead)
 
     print("Detecting Noise")
     noNoise = synthesizer.detectNoise()
@@ -22,30 +24,24 @@ if __name__ == "__main__":
     print("Extracting Data Signal")
     dataSignal = synthesizer.extractDataSignal(recording)
     #receivedVectors = synthesizer.decodeSignalToBitVector(dataSignal, noNoise)
-    print("2ESPACE")
-    receivedVectors = synthesizer.decodeur2LEspace(dataSignal, noNoise)
-    print("3ESPACE")
-#    receivedVectors = synthesizer.decodeur3LEspace(dataSignal, noNoise)
-    print(receivedVectors)
+    receivedVectors_vec = [synthesizer.decodeur2LEspace(dataSignal, noNoise) , synthesizer.decodeur3LEspace(dataSignal, noNoise), synthesizer.decodeur3LEspace(dataSignal, noNoise)]
 
 
+    for receivedVectors in receivedVectors_vec:
+        l = min(len(receivedVectors),len(encodedVectors))
+        L = max(len(receivedVectors),len(encodedVectors))
+        print(l,L)
+        diff = np.sum(np.array(receivedVectors)[:l]!=np.array(encodedVectors)[:l])+(L-l)
+        print(diff)
 
-    stringRead = io.readFile(Lib.FILENAME_READ)
-    encodedVectors = coder.encode(stringRead)
-    l = min(len(receivedVectors),len(encodedVectors))
-    L = max(len(receivedVectors),len(encodedVectors))
-    print(l,L)
-    diff = np.sum(np.array(receivedVectors)[:l]!=np.array(encodedVectors)[:l])+(L-l)
-    print(diff)
-
-    Plot.plot(np.logical_xor(receivedVectors[:l], encodedVectors[:l]).reshape([-1]))
-    Plot.show()
+        Plot.plot(np.logical_xor(receivedVectors[:l], encodedVectors[:l]).reshape([-1]))
+        Plot.show()
 
 
-    decodedTuple = coder.decode(receivedVectors)
-    decodedString = decodedTuple[1]
-    print("DECODED STRING:")
-    print(decodedString)
+        decodedTuple = coder.decode(receivedVectors)
+        decodedString = decodedTuple[1]
+        print("DECODED STRING:")
+        print(decodedString)
 
     if (decodedTuple[0]):
         io.writeFile(Lib.FILENAME_WRITE, decodedString)
