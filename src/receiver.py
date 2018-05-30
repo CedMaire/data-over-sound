@@ -11,10 +11,11 @@ if __name__ == "__main__":
 
     print("Detecting Noise")
     noNoise = synthesizer.detectNoise()
+    noNoise = 1
     print("Recording Signal")
-    recording = synthesizer.recordSignal()
-    #Numpy.save("recording_80_22k", recording)
-    #recording = Numpy.load("recording44.npy")
+    #recording = synthesizer.recordSignal()
+    #Numpy.save("rec_total_003__2-3_44k", recording)
+    recording = Numpy.load("rec_total_003__1-2_44k.npy")
     Plot.plot(recording)
     Plot.show()
     print("Extracting Data Signal")

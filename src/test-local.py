@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     # Receive
     dataSignal = synthesizer.extractDataSignal(signalToSend)
-    receivedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
+    receivedVectors = synthesizer.decodeur2LEspace(dataSignal, noNoise)
     print("RECEIVED VECTORS:")
     print(receivedVectors)
 

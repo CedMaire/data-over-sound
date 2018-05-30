@@ -12,7 +12,6 @@ class Synthesizer:
         pass
 
     def detectNoise(self):
-        return 2 # deal with it
         SoundDevice.default.channels = 1
         record = SoundDevice.rec(Lib.SAMPLES_PER_SEC * Lib.NOISE_DETECTION_TIME,
                                  Lib.SAMPLES_PER_SEC,
@@ -113,19 +112,20 @@ class Synthesizer:
         return bla
 
     def extractDataSignal(self, record):
-        noiseToSyncOn = self.createWhiteNoise()
-
-        maxDotProduct = 0
-        index = 0
-        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
-            dotProduct = Numpy.dot(noiseToSyncOn,
-                                   record[i:Lib.NUMBER_NOISE_SAMPLES + i])
-            if (dotProduct > maxDotProduct):
-                maxDotProduct = dotProduct
-                index = i
-
-        begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
-        #begin=181815
+        # noiseToSyncOn = self.createWhiteNoise()
+        #
+        # maxDotProduct = 0
+        # index = 0
+        # for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+        #     dotProduct = Numpy.dot(noiseToSyncOn,
+        #                            record[i:Lib.NUMBER_NOISE_SAMPLES + i])
+        #     if (dotProduct > maxDotProduct):
+        #         maxDotProduct = dotProduct
+        #         index = i
+        #
+        # begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
+        # print(begin)
+        begin=126623
         end = begin + int(Lib.NUMBER_DATA_SAMPLES)
 
         bla = record[begin:end]
@@ -136,7 +136,10 @@ class Synthesizer:
         return bla
 
     def decodeur2LEspace(self,signal,nonoise):
-        phaseSeeker=128
+        if (nonoise==1):
+            phaseSeeker=128
+        else:
+            phaseSeeker=128
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
         sinus = Numpy.zeros([phaseSeeker, len(t)])
 
@@ -146,7 +149,7 @@ class Synthesizer:
             f = Lib.LOWER_UPPER_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
 
         for i in range (phaseSeeker):
-            sinus[i]=Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)-1.5+i*0.05)
+            sinus[i]=5*Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)-1.5+i*0.05)
 
         #plot signal versus sin
         #Plot.plot(0.1*Numpy.tile(sinus[0,:], [1,2])[0,:])
@@ -161,8 +164,8 @@ class Synthesizer:
         currphase=0
         for chunk in chunks:
             dotArray[i,:]=chunk @ sinus.T
-            #Plot.plot(dotArray[i,:])
-            #Plot.show()
+            Plot.plot(dotArray[i,:])
+            Plot.show()
             #!! And here starts the fun !!
             min=0
             max=0
