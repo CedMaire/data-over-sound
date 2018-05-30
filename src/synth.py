@@ -157,13 +157,16 @@ class Synthesizer:
             if current >= len(signal):
                 break
             elif current+period_size >= len(signal):
-                current = current# + np.argmax(absconv[current-period_size:])
+                current = current +np.argmax(absconv[current-period_size:])
             else:
-                current = current# + np.argmax(absconv[current-period_size:current+period_size])
+                current = current + np.argmax(absconv[current-period_size:current+period_size])
+            #current = current + np.argmax(absconv[current-period_size:current+period_size])
             if conv[current] >= 0:
                 resultArray.append([1])
             else:
                 resultArray.append([0])
+        while len(resultArray) < Lib.NEEDED_AMOUNT_OF_VECTORS:
+            resultArray.append([0])
         return resultArray
 
 

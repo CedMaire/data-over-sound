@@ -14,9 +14,9 @@ if __name__ == "__main__":
     print("Detecting Noise")
     noNoise = synthesizer.detectNoise()
     print("Recording Signal")
-    #recording = synthesizer.recordSignal()
+    recording = synthesizer.recordSignal()
     #Numpy.save("recording_pierre", recording)
-    recording = Numpy.load("recording_pierre.npy")
+    #recording = Numpy.load("recording_pierre.npy")
     Plot.plot(recording)
     Plot.show()
     print("Extracting Data Signal")
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     print("2ESPACE")
     receivedVectors = synthesizer.decodeur2LEspace(dataSignal, noNoise)
     print("3ESPACE")
-    receivedVectors = synthesizer.decodeur3LEspace(dataSignal, noNoise)
+#    receivedVectors = synthesizer.decodeur3LEspace(dataSignal, noNoise)
     print(receivedVectors)
 
 
@@ -34,6 +34,7 @@ if __name__ == "__main__":
     encodedVectors = coder.encode(stringRead)
     l = min(len(receivedVectors),len(encodedVectors))
     L = max(len(receivedVectors),len(encodedVectors))
+    print(l,L)
     diff = np.sum(np.array(receivedVectors)[:l]!=np.array(encodedVectors)[:l])+(L-l)
     print(diff)
 
