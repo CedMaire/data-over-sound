@@ -4,6 +4,7 @@ import matplotlib.pyplot as Plot
 import iodeux as IODeux
 import lib as Lib
 import coder as Coder
+import numpy as np
 # import noisedeux as Noise
 
 
@@ -116,17 +117,18 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
-        """
-        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+        
+        '''for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
                 maxDotProduct = dotProduct
                 index = i
-        """
-        #begin = index + Lib.NUMBER_NOISE_SAMPLES
-        begin=181815
-        end = begin + Lib.NUMBER_DATA_SAMPLES
+        
+        begin = int(index + Lib.NUMBER_NOISE_SAMPLES)
+        print(begin)'''
+        begin=139406
+        end = int(begin + Lib.NUMBER_DATA_SAMPLES)
 
         bla = record[begin:end]
         Plot.plot(1.5 * record)
@@ -134,6 +136,35 @@ class Synthesizer:
         Plot.show()
 
         return bla
+
+    def decodeur3LEspace(self,signal,nonoise):
+        t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)[::-1]
+        if (nonoise == 1):
+            f = Lib.LOWER_LOW_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
+        else:
+            f = Lib.LOWER_UPPER_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
+        sin = Numpy.sin(2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)
+        conv = np.convolve(signal,sin)
+        Plot.plot(np.arange(len(conv)-Lib.ELEMENTS_PER_CHUNK)/Lib.ELEMENTS_PER_CHUNK, conv[Lib.ELEMENTS_PER_CHUNK:]/4)
+        Plot.plot(np.arange(len(signal))/Lib.ELEMENTS_PER_CHUNK, signal*15)
+        absconv = np.abs(conv)
+        resultArray=[]
+        current = 0
+        period_size = int(Lib.SAMPLES_PER_SEC / (2*f))
+        for i in range(Lib.NEEDED_AMOUNT_OF_VECTORS):
+            current = current + Lib.ELEMENTS_PER_CHUNK
+            if current >= len(signal):
+                break
+            elif current+period_size >= len(signal):
+                current = current# + np.argmax(absconv[current-period_size:])
+            else:
+                current = current# + np.argmax(absconv[current-period_size:current+period_size])
+            if conv[current] >= 0:
+                resultArray.append([1])
+            else:
+                resultArray.append([0])
+        return resultArray
+        
 
     def decodeur2LEspace(self,signal,nonoise):
         phaseSeeker=128

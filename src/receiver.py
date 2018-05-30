@@ -4,6 +4,8 @@ import coder as Coder
 import synth as Synthesizer
 import numpy as Numpy
 import matplotlib.pyplot as Plot
+import numpy as np
+
 if __name__ == "__main__":
     io = IODeux.IODeux()
     coder = Coder.Coder()
@@ -14,14 +16,28 @@ if __name__ == "__main__":
     print("Recording Signal")
     #recording = synthesizer.recordSignal()
     #Numpy.save("recording_80_22k", recording)
-    recording = Numpy.load("recording44.npy")
+    recording = Numpy.load("recording_80_22k.npy")
     Plot.plot(recording)
     Plot.show()
     print("Extracting Data Signal")
-    dataSignal = synthesizer.extractDataSignal(recording)
+    #dataSignal = synthesizer.extractDataSignal(recording)
     #receivedVectors = synthesizer.decodeSignalToBitVector(dataSignal, noNoise)
-    receivedVectors = synthesizer.decodeur2LEspace(dataSignal, noNoise)
+    #receivedVectors = synthesizer.decodeur2LEspace(dataSignal, noNoise)
+    receivedVectors = synthesizer.decodeur3LEspace(dataSignal, noNoise)
     print(receivedVectors)
+    
+    
+    
+    stringRead = io.readFile(Lib.FILENAME_READ)
+    encodedVectors = coder.encode(stringRead)
+    l = min(len(receivedVectors),len(encodedVectors))
+    L = max(len(receivedVectors),len(encodedVectors))
+    diff = np.sum(np.array(receivedVectors)[:l]!=np.array(encodedVectors)[:l])+(L-l)
+    print(diff)
+    
+    Plot.plot(np.logical_xor(receivedVectors[:l], encodedVectors[:l]).reshape([-1]))
+    Plot.show()
+    
 
     decodedTuple = coder.decode(receivedVectors)
     decodedString = decodedTuple[1]
