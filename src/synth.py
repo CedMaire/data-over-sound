@@ -19,9 +19,10 @@ class Synthesizer:
                                  channels=1)[:, 0]
 
         recordfft = Numpy.fft.fft(record)
-
-        sum1000 = Numpy.sum(Numpy.abs(recordfft[1000:2000]))
-        sum2000 = Numpy.sum(Numpy.abs(recordfft[2000:3000]))
+        Plot.plot(recordfft)
+        Plot.show()
+        sum1000 = Numpy.sum(Numpy.abs(recordfft[2000:4000]))
+        sum2000 = Numpy.sum(Numpy.abs(recordfft[4000:6000]))
 
         if (sum1000 > sum2000):
             print("Noise-free Frequencies: [2000:3000]")
@@ -62,11 +63,10 @@ class Synthesizer:
         Plot.plot(sin0)
         Plot.plot(sin1)
         Plot.show()
-        sins = Numpy.zeros([2,len(sin0)])
-        sins[0,:]=sin0
-        sins[1,:]=sin1# c'est moche mais c'est pour matcher avec votre truc
-        return sins[array,:].reshape([-1])
-
+        sins = Numpy.zeros([2, len(sin0)])
+        sins[0, :] = sin0
+        sins[1, :] = sin1  # c'est moche mais c'est pour matcher avec votre truc
+        return sins[array, :].reshape([-1])
 
     '''def computeFrequencies(self, vector, lowerFrequencyBound):
         frequencies = []
@@ -80,9 +80,11 @@ class Synthesizer:
                                      Lib.FREQUENCY_STEP * (i + 1)))
 
         return frequencies'''
+
     def computeFrequencies(self, vector, lowerFrequencyBound):
-        frequencies = Numpy.ones(vector.shape) * lowerFrequencyBound + Lib.FREQUENCY_STEP
-        frequencies[vector == 0] = -1*frequencies[vector == 0]
+        #frequencies = Numpy.ones(vector.shape) * lowerFrequencyBound + Lib.FREQUENCY_STEP
+        frequencies = Numpy.ones(vector.shape) * lowerFrequencyBound + 900
+        frequencies[vector == 0] = -1 * frequencies[vector == 0]
         return frequencies
 
     def generateVectorSignal(self, vector, nonoise):
@@ -91,13 +93,13 @@ class Synthesizer:
             freqs = self.computeFrequencies(vector, Lib.LOWER_LOW_FREQUENCY_BOUND) if (nonoise == 1) \
             else self.computeFrequencies(vector, Lib.LOWER_UPPER_FREQUENCY_BOUND)
         """
-        f=1500 if nonoise==1 else 2500
+        f = 1500 if nonoise == 1 else 2500
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
         signal = Numpy.zeros(t.shape)
-        if(vector[0]==1):
-            signal=signal+Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
-        if(vector[0]==0):
-            signal=signal+Numpy.sin(2 * Numpy.pi * t * (-f) / Lib.SAMPLES_PER_SEC)
+        if(vector[0] == 1):
+            signal = signal + Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
+        if(vector[0] == 0):
+            signal = signal + Numpy.sin(2 * Numpy.pi * t * (-f) / Lib.SAMPLES_PER_SEC)
         return signal
 
     def recordSignal(self):
@@ -112,20 +114,20 @@ class Synthesizer:
         return bla
 
     def extractDataSignal(self, record):
-        # noiseToSyncOn = self.createWhiteNoise()
-        #
-        # maxDotProduct = 0
-        # index = 0
-        # for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
-        #     dotProduct = Numpy.dot(noiseToSyncOn,
-        #                            record[i:Lib.NUMBER_NOISE_SAMPLES + i])
-        #     if (dotProduct > maxDotProduct):
-        #         maxDotProduct = dotProduct
-        #         index = i
-        #
-        # begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
+        noiseToSyncOn = self.createWhiteNoise()
+
+        maxDotProduct = 0
+        index = 0
+        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+            dotProduct = Numpy.dot(noiseToSyncOn,
+                                   record[i:Lib.NUMBER_NOISE_SAMPLES + i])
+            if (dotProduct > maxDotProduct):
+                maxDotProduct = dotProduct
+                index = i
+
+        begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
         # print(begin)
-        begin=126623
+        #begin = 126623
         end = begin + int(Lib.NUMBER_DATA_SAMPLES)
 
         bla = record[begin:end]
@@ -135,66 +137,66 @@ class Synthesizer:
 
         return bla
 
-    def decodeur2LEspace(self,signal,nonoise):
-        if (nonoise==1):
-            phaseSeeker=128
+    def decodeur2LEspace(self, signal, nonoise):
+        if (nonoise == 1):
+            phaseSeeker = 128
         else:
-            phaseSeeker=128
+            phaseSeeker = 128
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
         sinus = Numpy.zeros([phaseSeeker, len(t)])
 
         if (nonoise == 1):
-            f = Lib.LOWER_LOW_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
+            f = Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP
         else:
-            f = Lib.LOWER_UPPER_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
+            f = Lib.LOWER_UPPER_FREQUENCY_BOUND + Lib.FREQUENCY_STEP
 
-        for i in range (phaseSeeker):
-            sinus[i]=5*Numpy.sin((2*Numpy.pi*t*f/Lib.SAMPLES_PER_SEC)-1.5+i*0.05)
+        for i in range(phaseSeeker):
+            sinus[i] = 5 * Numpy.sin((2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC) - 1.5 + i * 0.05)
 
-        #plot signal versus sin
+        # plot signal versus sin
         #Plot.plot(0.1*Numpy.tile(sinus[0,:], [1,2])[0,:])
-        #Plot.plot(signal[:2*Lib.ELEMENTS_PER_CHUNK])
-        #Plot.plot(Numpy.zeros(2*Lib.ELEMENTS_PER_CHUNK))
-        #Plot.show()
+        # Plot.plot(signal[:2*Lib.ELEMENTS_PER_CHUNK])
+        # Plot.plot(Numpy.zeros(2*Lib.ELEMENTS_PER_CHUNK))
+        # Plot.show()
 
         chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
-        dotArray=Numpy.zeros([chunks.shape[0],phaseSeeker])
-        i=0
-        resultArray=[]
-        currphase=0
+        dotArray = Numpy.zeros([chunks.shape[0], phaseSeeker])
+        i = 0
+        resultArray = []
+        currphase = 0
         for chunk in chunks:
-            dotArray[i,:]=chunk @ sinus.T
-            Plot.plot(dotArray[i,:])
-            Plot.show()
+            dotArray[i, :] = chunk @ sinus.T
+            # Plot.plot(dotArray[i,:])
+            # Plot.show()
             #!! And here starts the fun !!
-            min=0
-            max=0
-            jmax=None
-            jmin=None
+            min = 0
+            max = 0
+            jmax = None
+            jmin = None
             for j in range(phaseSeeker):
-                if (dotArray[i][j]>max):
-                    max=dotArray[i][j]
-                    jmax=j
-                elif (dotArray[i][j]<min):
-                    min=dotArray[i][j]
-                    jmin=j
-            jdistmin=self.findClosestIndex(currphase,jmin,jmax,phaseSeeker)
-            if (dotArray[i][jdistmin]<0):
+                if (dotArray[i][j] > max):
+                    max = dotArray[i][j]
+                    jmax = j
+                elif (dotArray[i][j] < min):
+                    min = dotArray[i][j]
+                    jmin = j
+            jdistmin = self.findClosestIndex(currphase, jmin, jmax, phaseSeeker)
+            if (dotArray[i][jdistmin] < 0):
                 resultArray.append([0])
-                currphase=jdistmin
+                currphase = jdistmin
             else:
                 resultArray.append([1])
-                currphase=jdistmin
+                currphase = jdistmin
             print(currphase)
-        i=i+1
+        i = i + 1
         return resultArray
 
-    def findClosestIndex(self,j0,j1,j2,phaseSeeker):
-        d1=Numpy.abs(j1-j0)
-        if(d1>phaseSeeker/2):
-            d1=phaseSeeker-d1
-        d2=Numpy.abs(j2-j0)
-        if(d2>phaseSeeker/2):
-            d2=phaseSeeker-d2
+    def findClosestIndex(self, j0, j1, j2, phaseSeeker):
+        d1 = Numpy.abs(j1 - j0)
+        if(d1 > phaseSeeker / 2):
+            d1 = phaseSeeker - d1
+        d2 = Numpy.abs(j2 - j0)
+        if(d2 > phaseSeeker / 2):
+            d2 = phaseSeeker - d2
         #print("debug", "d1",d1,"j1",j1,"d2",d2,"j2",j2)
-        return j1 if d1<d2 else j2
+        return j1 if d1 < d2 else j2
