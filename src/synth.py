@@ -138,7 +138,7 @@ class Synthesizer:
 
         return bla
 
-    def decodeur3LEspace(self,signal,nonoise):
+    def decodeur3LEspace(self,signal,nonoise, dephase = False):
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)[::-1]
         if (nonoise == 1):
             f = Lib.LOWER_LOW_FREQUENCY_BOUND+Lib.FREQUENCY_STEP
@@ -151,16 +151,17 @@ class Synthesizer:
         absconv = np.abs(conv)
         resultArray=[]
         current = 0
-        period_size = int(Lib.SAMPLES_PER_SEC / (2*f))
+        if dephase:
+            period_size = int(Lib.SAMPLES_PER_SEC / (2*f))
+        else:
+            period_size = 0
         for i in range(Lib.NEEDED_AMOUNT_OF_VECTORS):
             current = current + Lib.ELEMENTS_PER_CHUNK
-            if current >= len(signal):
-                break
-            elif current+period_size >= len(signal):
-                current = current +np.argmax(absconv[current-period_size:])
-            else:
+            window = absconv[max(0,current-period_size):min(len(absconv),current+period_size)]
+            if len(window) > 0:
                 current = current + np.argmax(absconv[current-period_size:current+period_size])
-            #current = current + np.argmax(absconv[current-period_size:current+period_size])
+            if current > Lib.NEEDED_AMOUNT_OF_VECTORS:
+                break
             if conv[current] >= 0:
                 resultArray.append([1])
             else:

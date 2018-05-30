@@ -24,7 +24,7 @@ if __name__ == "__main__":
     print("Extracting Data Signal")
     dataSignal = synthesizer.extractDataSignal(recording)
     #receivedVectors = synthesizer.decodeSignalToBitVector(dataSignal, noNoise)
-    receivedVectors_vec = [synthesizer.decodeur2LEspace(dataSignal, noNoise) , synthesizer.decodeur3LEspace(dataSignal, noNoise), synthesizer.decodeur3LEspace(dataSignal, noNoise)]
+    receivedVectors_vec = [synthesizer.decodeur2LEspace(dataSignal, noNoise) , synthesizer.decodeur3LEspace(dataSignal, noNoise), synthesizer.decodeur3LEspace(dataSignal, noNoise, True)]
 
 
     for receivedVectors in receivedVectors_vec:
