@@ -15,29 +15,31 @@ if __name__ == "__main__":
     noNoise = synthesizer.detectNoise()
     print("Recording Signal")
     #recording = synthesizer.recordSignal()
-    #Numpy.save("recording_80_22k", recording)
-    recording = Numpy.load("recording_80_22k.npy")
+    #Numpy.save("recording_pierre", recording)
+    recording = Numpy.load("recording_pierre.npy")
     Plot.plot(recording)
     Plot.show()
     print("Extracting Data Signal")
-    #dataSignal = synthesizer.extractDataSignal(recording)
+    dataSignal = synthesizer.extractDataSignal(recording)
     #receivedVectors = synthesizer.decodeSignalToBitVector(dataSignal, noNoise)
-    #receivedVectors = synthesizer.decodeur2LEspace(dataSignal, noNoise)
+    print("2ESPACE")
+    receivedVectors = synthesizer.decodeur2LEspace(dataSignal, noNoise)
+    print("3ESPACE")
     receivedVectors = synthesizer.decodeur3LEspace(dataSignal, noNoise)
     print(receivedVectors)
-    
-    
-    
+
+
+
     stringRead = io.readFile(Lib.FILENAME_READ)
     encodedVectors = coder.encode(stringRead)
     l = min(len(receivedVectors),len(encodedVectors))
     L = max(len(receivedVectors),len(encodedVectors))
     diff = np.sum(np.array(receivedVectors)[:l]!=np.array(encodedVectors)[:l])+(L-l)
     print(diff)
-    
+
     Plot.plot(np.logical_xor(receivedVectors[:l], encodedVectors[:l]).reshape([-1]))
     Plot.show()
-    
+
 
     decodedTuple = coder.decode(receivedVectors)
     decodedString = decodedTuple[1]
