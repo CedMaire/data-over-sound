@@ -37,9 +37,13 @@ class Synthesizer:
 
     def generateCompleteSignal(self, array, nonoise):
         signal = Numpy.zeros(0)
+        sync=self.createWhiteNoise()
         savedSignalDict = {}
 
+        i=0
         for a in array:
+            if (i%500==0):
+                signal=Numpy.concatenate([signal,Numpy.zeros(Lib.SAMPLES_PER_SEC),sync])
             if (repr(a) in savedSignalDict):
                 signal = Numpy.concatenate(
                     [signal, savedSignalDict.get(repr(a))])
@@ -47,6 +51,7 @@ class Synthesizer:
                 inter = self.generateVectorSignal(a, nonoise)
                 savedSignalDict[repr(a)] = inter
                 signal = Numpy.concatenate([signal, inter])
+            i=i+1
 
         return signal
 
@@ -86,7 +91,7 @@ class Synthesizer:
 
         return recording
 
-    def extractDataSignal(self, record):
+    def extractDataSignal(self, record,last):
         noiseToSyncOn = self.createWhiteNoise()
 
         maxDotProduct = 0
@@ -105,6 +110,8 @@ class Synthesizer:
             begin = end + int(Lib.NUMBER_NOISE_SAMPLES)
             end = begin + int(Lib.NUMBER_DATA_SAMPLES* (500/2040))
             bla = bla.append(record[begin:end])
+        bla = record[begin:end]
+        print("bla",len(bla))
         Plot.plot(1.5 * record)
         Plot.plot(Numpy.concatenate([Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
         Plot.show()
@@ -114,12 +121,26 @@ class Synthesizer:
     def decodeSignalToBitVectors(self, signal, nonoise):
         #chunks = [signal[i:i + Lib.SAMPLES_PER_CHUNK]
         #          for i in range(0, len(signal), Lib.SAMPLES_PER_CHUNK)]
-        chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
-        bitVectors = []
-        for chunk in chunks:
-            bitVectors.append(
-                self.decodeSignalChunkToBitVector(chunk, nonoise))
 
+        print("signal",len(signal))
+        signal1=self.extractDataSignal(signal,False)
+        print("signal1",len(signal1))
+        signal2=self.extractDataSignal(signal[len(signal1):len(signal)],False)
+        signal3=self.extractDataSignal(signal[len(signal2):len(signal)],False)
+        signal4=self.extractDataSignal(signal[len(signal3):len(signal)],True)
+
+        chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
+        bitVectors = Numpy.zeros((2040,1))
+        i=0
+        debug=False
+        for chunk in chunks:
+            print("CHUNK NB",i)
+            if (i>728 or i<5):
+                debug=True
+            bitVectors[i]=self.decodeSignalChunkToBitVector(chunk, nonoise,debug)
+            print(bitVectors[i])
+            debug=False
+            i=1+i
         return bitVectors
 
     def decodeSignalChunkToBitVector(self, chunk, nonoise):

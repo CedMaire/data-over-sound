@@ -22,8 +22,8 @@ if __name__ == "__main__":
     print(encodedVectors)
 
     # Generate Signal
-    noiseStart = synthesizer.createWhiteNoise()
-    noiseEnd = synthesizer.createWhiteNoise()
+    #noiseStart = synthesizer.createWhiteNoise()
+    #noiseEnd = synthesizer.createWhiteNoise()
 
     noNoise = 2  # CHANGE AS YOU WANT BETWEEN {1, 2}
     noiseMiddle = None
@@ -43,12 +43,13 @@ if __name__ == "__main__":
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
 
     # Send
-    signalToSend = Numpy.concatenate(
-        [noiseStart, signalToSend])
+    #signalToSend = Numpy.concatenate(
+    #    [noiseStart, signalToSend])
 
     # Receive
-    dataSignal = synthesizer.extractDataSignal(signalToSend)
-    receivedVectors = synthesizer.decodeSignalToBitVectors(dataSignal, noNoise)
+    #dataSignal = synthesizer.extractDataSignal(signalToSend)
+    receivedVectors = synthesizer.decodeSignalToBitVectors(signalToSend, noNoise)
+    receivedVectors=list(map(lambda x : list(map(lambda y: int(y), x)),receivedVectors))
     print("RECEIVED VECTORS:")
     print(receivedVectors)
 

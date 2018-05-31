@@ -20,11 +20,11 @@ if __name__ == "__main__":
     print(encodedVectors)
 
     noNoise = synthesizer.detectNoise()
-    synchNoise = synthesizer.createWhiteNoise()
+    #synchNoise = synthesizer.createWhiteNoise()
 
     print("Building Signal...")
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
-    signalToSend = Numpy.concatenate([synchNoise, signalToSend])
+    #signalToSend = Numpy.concatenate([synchNoise, signalToSend])
     Plot.plot(signalToSend)
     Plot.show()
-    #SoundDevice.play(signalToSend, Lib.SAMPLES_PER_SEC, blocking=True)
+    SoundDevice.play(signalToSend, Lib.SAMPLES_PER_SEC, blocking=True)
