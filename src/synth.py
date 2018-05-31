@@ -95,12 +95,8 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
-<<<<<<< HEAD
         endsearch=15*44100
         for i in range(0, endsearch):
-=======
-        for i in range(4*44100):
->>>>>>> 3fc88bb412c21e265faa07ed190447103024c479
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
@@ -108,19 +104,10 @@ class Synthesizer:
                 index = i
 
         begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
-<<<<<<< HEAD
         print(begin)
         end = begin + int(510*Lib.ELEMENTS_PER_CHUNK)
 
 
-=======
-        end = begin + int(Lib.NUMBER_DATA_SAMPLES*(500/2040))
-        bla = record[begin:end]
-        for i in range(4):
-            begin = end + int(Lib.NUMBER_NOISE_SAMPLES)
-            end = begin + int(Lib.NUMBER_DATA_SAMPLES* (500/2040))
-            bla = bla.append(record[begin:end])
->>>>>>> 3fc88bb412c21e265faa07ed190447103024c479
         bla = record[begin:end]
         print("bla",len(bla))
         Plot.plot(1.5 * record)
@@ -158,7 +145,6 @@ class Synthesizer:
             i=1+i
         return Numpy.array(bitVectors)
 
-<<<<<<< HEAD
     def decodeSignalChunkToBitVector(self, chunk, nonoise,debug):
 
         w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
@@ -180,9 +166,6 @@ class Synthesizer:
         else :
             return [int(0)]
     """def decodeSignalChunkToBitVector(self, chunk, nonoise):
-=======
-    def decodeSignalChunkToBitVector(self, chunk, nonoise):
->>>>>>> 3fc88bb412c21e265faa07ed190447103024c479
         # Plot.plot(chunk)
         # Plot.show()
         w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
