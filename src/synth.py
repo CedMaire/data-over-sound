@@ -91,17 +91,20 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
-        # for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
-        #     dotProduct = Numpy.dot(noiseToSyncOn,
-        #                            record[i:Lib.NUMBER_NOISE_SAMPLES + i])
-        #     if (dotProduct > maxDotProduct):
-        #         maxDotProduct = dotProduct
-        #         index = i
-        #
-        # begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
-        begin=115152
-        end = begin + int(Lib.NUMBER_DATA_SAMPLES)
+        for i in range(4*44100):
+            dotProduct = Numpy.dot(noiseToSyncOn,
+                                   record[i:Lib.NUMBER_NOISE_SAMPLES + i])
+            if (dotProduct > maxDotProduct):
+                maxDotProduct = dotProduct
+                index = i
+
+        begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
+        end = begin + int(Lib.NUMBER_DATA_SAMPLES*(500/2040))
         bla = record[begin:end]
+        for i in range(4):
+            begin = end + int(Lib.NUMBER_NOISE_SAMPLES)
+            end = begin + int(Lib.NUMBER_DATA_SAMPLES* (500/2040))
+            bla = bla.append(record[begin:end])
         Plot.plot(1.5 * record)
         Plot.plot(Numpy.concatenate([Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
         Plot.show()
