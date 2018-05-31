@@ -4,6 +4,7 @@ import coder as Coder
 import synth as Synthesizer
 import sounddevice as SoundDevice
 import numpy as Numpy
+import matplotlib.pyplot as Plot
 
 if __name__ == "__main__":
     # TODO: REVIEW
@@ -24,5 +25,6 @@ if __name__ == "__main__":
     print("Building Signal...")
     signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
     signalToSend = Numpy.concatenate([synchNoise, signalToSend])
-
-    SoundDevice.play(signalToSend, Lib.SAMPLES_PER_SEC, blocking=True)
+    Plot.plot(signalToSend)
+    Plot.show()
+    #SoundDevice.play(signalToSend, Lib.SAMPLES_PER_SEC, blocking=True)

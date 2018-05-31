@@ -52,18 +52,20 @@ class Synthesizer:
         for i in range(0, Lib.CHUNK_SIZE):
             if (vector[i] == 1):
                 if (nonoise == 1):
-                    frequencies.append(
-                        Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1))
+                    frequencies.append(int(
+                        Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
                 else:
-                    frequencies.append(
-                        Lib.UPPER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1))
-
+                    frequencies.append(int(
+                        Lib.UPPER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
+            else :
+                frequencies.append(0)
         t = Numpy.arange(Lib.TIME_PER_CHUNK * Lib.SAMPLES_PER_CHUNK)
+        #print(t)
+        #print(frequencies)
         signal = Numpy.zeros(0)
 
         for f in frequencies:
-            signal = Numpy.concatenate(
-                Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_CHUNK))
+            signal = Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_CHUNK)
 
         return signal
 
