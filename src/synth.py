@@ -9,6 +9,7 @@ class Synthesizer:
         pass
 
     def detectNoise(self):
+        return 2
         record = SoundDevice.rec(Lib.SAMPLES_PER_SEC * Lib.NOISE_DETECTION_TIME,
                                  Lib.SAMPLES_PER_SEC,
                                  blocking=True,
@@ -70,7 +71,7 @@ class Synthesizer:
         return signal
 
     def recordSignal(self):
-        recording = SoundDevice.rec(Lib.RECORDING_SAMPLES_TOTAL,
+        recording = SoundDevice.rec(int(Lib.RECORDING_SAMPLES_TOTAL),
                                     Lib.SAMPLES_PER_SEC,
                                     blocking=True,
                                     channels=1)[:, 0]
