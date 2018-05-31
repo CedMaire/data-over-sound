@@ -43,17 +43,18 @@ if __name__ == "__main__":
     # Send
     synchNoise = synthesizer.createWhiteNoise()
     print("Building Signal...")
+    zeros = Numpy.zeros(Lib.SAMPLES_PER_SEC)
+
     tmp = synthesizer.generateCompleteSignal(encodedVectors[0:51], noNoise)
     #print("encodedVectors[0:(51)]")
     signalToSend = Numpy.concatenate([synchNoise, tmp])
     for i in range(1,40):
         tmp = synthesizer.generateCompleteSignal(encodedVectors[51*i:(51+51*i)], noNoise)
         #print(i," encodedVectors[",51*i,":(",51+51*i,")]")
-        tmp2 = Numpy.concatenate([signalToSend, synchNoise])
+        tmp2 = Numpy.concatenate([signalToSend, zeros])
         signalToSend = Numpy.concatenate([tmp2, tmp])
-        #print(len(signalToSend))
-    # signalToSend = Numpy.concatenate(
-    #     [noiseStart, signalToSend + noiseMiddle, noiseEnd])
+    print(signalToSend)
+    print("Done!")
 
     # Receive
     dataSignal = synthesizer.extractDataSignal(signalToSend)
