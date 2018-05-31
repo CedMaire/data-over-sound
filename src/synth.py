@@ -53,13 +53,18 @@ class Synthesizer:
         for i in range(0, Lib.CHUNK_SIZE):
             if (vector[i] == 1):
                 if (nonoise == 1):
-                    frequencies.append(int(
-                        Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
+                    frequencies.append(int(1027))
+                        #Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
                 else:
-                    frequencies.append(int(
-                        Lib.UPPER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
+                    frequencies.append(int(2027))
+                        #Lib.UPPER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
             else :
-                frequencies.append(0)
+                if (nonoise == 1):
+                    frequencies.append(int(1234))
+                        #Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
+                else:
+                    frequencies.append(int(2789))
+                        #Lib.UPPER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
         t = Numpy.arange(Lib.TIME_PER_CHUNK * Lib.SAMPLES_PER_SEC)
         #print(t)
         #print(frequencies)
@@ -115,7 +120,7 @@ class Synthesizer:
     def decodeSignalChunkToBitVector(self, chunk, nonoise):
         Plot.plot(chunk)
         Plot.show()
-        w = Numpy.abs(Numpy.imag(Numpy.fft.fft(chunk)))
+        w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
         f = Numpy.abs(Numpy.fft.fftfreq(len(w), 1 / Lib.SAMPLES_PER_SEC))
 
         Plot.plot(f, w)
