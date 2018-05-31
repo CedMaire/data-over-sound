@@ -48,30 +48,20 @@ class Synthesizer:
         return signal
 
     def generateVectorSignal(self, vector, nonoise):
-        frequencies = []
-
-        for i in range(0, Lib.CHUNK_SIZE):
-            if (vector[i] == 1):
-                if (nonoise == 1):
-                    frequencies.append(int(1027))
-                        #Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
-                else:
-                    frequencies.append(int(2027))
-                        #Lib.UPPER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
-            else :
-                if (nonoise == 1):
-                    frequencies.append(int(1234))
-                        #Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
-                else:
-                    frequencies.append(int(2789))
-                        #Lib.UPPER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
+        frequencies = Numpy.full(Lib.CHUNK_SIZE, 1500) if(nonoise == 1) \
+            else Numpy.full(Lib.CHUNK_SIZE, 2500)
         t = Numpy.arange(Lib.TIME_PER_CHUNK * Lib.SAMPLES_PER_SEC)
-        #print(t)
-        #print(frequencies)
+
         signal = Numpy.zeros(0)
 
         for f in frequencies:
-            signal = Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
+            for e in vector:
+                if e == 0:
+                    signal = Numpy.sin(2 * Numpy.pi * t *
+                                       f / Lib.SAMPLES_PER_SEC)
+                else:
+                    signal = 5 * Numpy.sin(2 * Numpy.pi *
+                                           t * f / Lib.SAMPLES_PER_SEC)
 
         return signal
 
@@ -96,55 +86,43 @@ class Synthesizer:
                 index = i
 
         begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
-        #begin=181815
+        # begin=181815
         end = begin + int(Lib.NUMBER_DATA_SAMPLES)
 
         bla = record[begin:end]
-        Plot.plot(1.5 * record)
-        Plot.plot(Numpy.concatenate([Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
+        Plot.plot(1.3 * record)
+        Plot.plot(Numpy.concatenate(
+            [Numpy.zeros(begin), bla, Numpy.zeros(int(end - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))]))
         Plot.show()
 
         return bla
 
     def decodeSignalToBitVectors(self, signal, nonoise):
-        #chunks = [signal[i:i + Lib.SAMPLES_PER_CHUNK]
-        #          for i in range(0, len(signal), Lib.SAMPLES_PER_CHUNK)]
         chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
-        bitVectors = []
+        dots = []
+
+        # i = 0
         for chunk in chunks:
-            bitVectors.append(
+            # Plot.plot(1.3 * signal)
+            # Plot.plot(Numpy.concatenate(
+            #     [Numpy.zeros(i * Lib.ELEMENTS_PER_CHUNK), chunk, Numpy.zeros(len(signal) - (i + 1) * Lib.ELEMENTS_PER_CHUNK)]))
+            # Plot.show()
+            # i += 1
+            dots.append(
                 self.decodeSignalChunkToBitVector(chunk, nonoise))
 
-        return bitVectors
+        myMid = Numpy.sum(dots) / len(dots)
+
+        myBits = list(map(lambda x: [0] if x < myMid else[1], dots))
+
+        return myBits
 
     def decodeSignalChunkToBitVector(self, chunk, nonoise):
-        Plot.plot(chunk)
-        Plot.show()
-        w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
-        f = Numpy.abs(Numpy.fft.fftfreq(len(w), 1 / Lib.SAMPLES_PER_SEC))
+        f = 1500 if (nonoise == 1) else 2500
+        t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
 
-        Plot.plot(f, w)
-        Plot.show()
+        mysin = Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
 
-        '''
-        peaks = np.empty(2*ones)
-        i = 0
-        for x in range(2*ones):
-            idx = np.argmax(np.abs(w))
-            freq = f[idx]
-            freq_in_hertz = abs(freq * frequence)
-            peaks[i]=freq_in_hertz
-            w = np.delete(w, idx)
-            idx = np.argmax(np.abs(w))
-            w = np.delete(w, idx)
-            i+=1
-        peaks=np.sort(peaks)
-        return peaks
-        '''
+        dot = Numpy.dot(chunk, mysin)
 
-
-if __name__ == "__main__":
-    synthesizer = Synthesizer()
-
-    synthesizer.decodeSignalChunkToBitVector(
-        Numpy.sin(2 * Numpy.pi * Numpy.arange(Lib.SAMPLES_PER_CHUNK) * 1500 / Lib.SAMPLES_PER_SEC), 1)
+        return dot

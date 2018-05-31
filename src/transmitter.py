@@ -23,8 +23,10 @@ if __name__ == "__main__":
     synchNoise = synthesizer.createWhiteNoise()
 
     print("Building Signal...")
-    signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
-    signalToSend = Numpy.concatenate([synchNoise, signalToSend])
+    #signalToSend = synthesizer.generateCompleteSignal(encodedVectors, noNoise)
+    #signalToSend = Numpy.concatenate([synchNoise, signalToSend])
+    signalToSend = Numpy.load("highlow.npy")
     Plot.plot(signalToSend)
     Plot.show()
-    #SoundDevice.play(signalToSend, Lib.SAMPLES_PER_SEC, blocking=True)
+    #Numpy.save("highlow.npy", signalToSend)
+    SoundDevice.play(signalToSend, Lib.SAMPLES_PER_SEC, blocking=True)

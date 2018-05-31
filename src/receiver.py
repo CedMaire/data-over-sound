@@ -17,7 +17,7 @@ if __name__ == "__main__":
     print("Recording Signal")
     #recording = synthesizer.recordSignal()
     #Numpy.save("recording_fourierv22", recording)
-    recording = Numpy.load("recording_fourierv22.npy")
+    recording = Numpy.load("highlow.npy")
 
     print("Extracting Data Signal")
     dataSignal = synthesizer.extractDataSignal(recording)
