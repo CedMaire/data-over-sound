@@ -95,7 +95,7 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
-        endsearch=15*44100
+        endsearch=4*44100
         for i in range(0, endsearch):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
@@ -123,10 +123,10 @@ class Synthesizer:
         print("signal",len(signal))
         signal1=Numpy.array(self.extractDataSignal(signal))
         print("signal1",len(signal1))
-        signal2=Numpy.array(self.extractDataSignal(signal[len(signal1):len(signal)]))
+        signal2=Numpy.array(self.extractDataSignal(signal[len(signal1)+Lib.NUMBER_NOISE_SAMPLES:len(signal)]))
         print("signal2", len(signal2))
-        signal3=Numpy.array(self.extractDataSignal(signal[len(signal2)+len(signal1):len(signal)]))
-        signal4=Numpy.array(self.extractDataSignal(signal[len(signal3)+len(signal2)+len(signal1):len(signal)]))
+        signal3=Numpy.array(self.extractDataSignal(signal[len(signal2)+len(signal1)+2*Lib.NUMBER_NOISE_SAMPLES:len(signal)]))
+        signal4=Numpy.array(self.extractDataSignal(signal[len(signal3)+len(signal2)+len(signal1)+4*Lib.NUMBER_NOISE_SAMPLES:len(signal)]))
 
         chunks1 = signal1.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
         chunks2 = signal2.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
