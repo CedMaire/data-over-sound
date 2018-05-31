@@ -59,13 +59,13 @@ class Synthesizer:
                         Lib.UPPER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
             else :
                 frequencies.append(0)
-        t = Numpy.arange(Lib.TIME_PER_CHUNK * Lib.SAMPLES_PER_CHUNK)
+        t = Numpy.arange(Lib.TIME_PER_CHUNK * Lib.SAMPLES_PER_SEC)
         #print(t)
         #print(frequencies)
         signal = Numpy.zeros(0)
 
         for f in frequencies:
-            signal = Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_CHUNK)
+            signal = Numpy.sin(2 * Numpy.pi * t * f / Lib.SAMPLES_PER_SEC)
 
         return signal
 
@@ -82,23 +82,28 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
-
-        for i in range(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)):
+        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
                 maxDotProduct = dotProduct
                 index = i
 
-        begin = index + Lib.NUMBER_NOISE_SAMPLES
-        end = begin + Lib.NUMBER_DATA_SAMPLES
+        begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
+        #begin=181815
+        end = begin + int(Lib.NUMBER_DATA_SAMPLES)
 
-        return record[begin:end]
+        bla = record[begin:end]
+        Plot.plot(1.5 * record)
+        Plot.plot(Numpy.concatenate([Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
+        Plot.show()
+
+        return bla
 
     def decodeSignalToBitVectors(self, signal, nonoise):
-        chunks = [signal[i:i + Lib.SAMPLES_PER_CHUNK]
-                  for i in range(0, len(signal), Lib.SAMPLES_PER_CHUNK)]
-
+        #chunks = [signal[i:i + Lib.SAMPLES_PER_CHUNK]
+        #          for i in range(0, len(signal), Lib.SAMPLES_PER_CHUNK)]
+        chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
         bitVectors = []
         for chunk in chunks:
             bitVectors.append(
@@ -107,6 +112,8 @@ class Synthesizer:
         return bitVectors
 
     def decodeSignalChunkToBitVector(self, chunk, nonoise):
+        Plot.plot(chunk)
+        Plot.show()
         w = Numpy.abs(Numpy.imag(Numpy.fft.fft(chunk)))
         f = Numpy.abs(Numpy.fft.fftfreq(len(w), 1 / Lib.SAMPLES_PER_SEC))
 

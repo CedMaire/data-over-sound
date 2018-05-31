@@ -25,7 +25,7 @@ if __name__ == "__main__":
     noiseStart = synthesizer.createWhiteNoise()
     noiseEnd = synthesizer.createWhiteNoise()
 
-    noNoise = 1  # CHANGE AS YOU WANT BETWEEN {1, 2}
+    noNoise = 2  # CHANGE AS YOU WANT BETWEEN {1, 2}
     noiseMiddle = None
     if(noNoise == 2):
         noiseMiddle = noise.generateBandLimitedNoise(
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # Send
     signalToSend = Numpy.concatenate(
-        [noiseStart, signalToSend + noiseMiddle, noiseEnd])
+        [noiseStart, signalToSend])
 
     # Receive
     dataSignal = synthesizer.extractDataSignal(signalToSend)
