@@ -4,7 +4,6 @@ import sounddevice as SoundDevice
 import matplotlib.pyplot as Plot
 from scipy.signal import find_peaks_cwt
 from scipy.interpolate import interp1d
-import peakutils
 
 
 class Synthesizer:
@@ -42,7 +41,7 @@ class Synthesizer:
 
         i=0
         for a in array:
-            if (i%500==0):
+            if (i%510==0):
                 signal=Numpy.concatenate([signal,Numpy.zeros(Lib.SAMPLES_PER_SEC),sync])
             if (repr(a) in savedSignalDict):
                 signal = Numpy.concatenate(
@@ -91,13 +90,13 @@ class Synthesizer:
 
         return recording
 
-    def extractDataSignal(self, record,last):
+    def extractDataSignal(self, record):
         noiseToSyncOn = self.createWhiteNoise()
 
         maxDotProduct = 0
         index = 0
-<<<<<<< HEAD
-        for i in range(0, 4*44100):
+        endsearch=15*44100
+        for i in range(0, endsearch):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
@@ -106,21 +105,9 @@ class Synthesizer:
 
         begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
         print(begin)
-        end = begin + int(500*Lib.ELEMENTS_PER_CHUNK)
-        if(last):
-            end=begin+int(40*Lib.ELEMENTS_PER_CHUNK)
-=======
-        # for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
-        #     dotProduct = Numpy.dot(noiseToSyncOn,
-        #                            record[i:Lib.NUMBER_NOISE_SAMPLES + i])
-        #     if (dotProduct > maxDotProduct):
-        #         maxDotProduct = dotProduct
-        #         index = i
-        #
-        # begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
-        begin=115152
-        end = begin + int(Lib.NUMBER_DATA_SAMPLES)
->>>>>>> 9ef6e8e48e3256a74da30efb79d2a51339b32c72
+        end = begin + int(510*Lib.ELEMENTS_PER_CHUNK)
+
+
         bla = record[begin:end]
         print("bla",len(bla))
         Plot.plot(1.5 * record)
@@ -134,27 +121,30 @@ class Synthesizer:
         #          for i in range(0, len(signal), Lib.SAMPLES_PER_CHUNK)]
 
         print("signal",len(signal))
-        signal1=self.extractDataSignal(signal,False)
+        signal1=Numpy.array(self.extractDataSignal(signal))
         print("signal1",len(signal1))
-        signal2=self.extractDataSignal(signal[len(signal1):len(signal)],False)
-        signal3=self.extractDataSignal(signal[len(signal2):len(signal)],False)
-        signal4=self.extractDataSignal(signal[len(signal3):len(signal)],True)
+        signal2=Numpy.array(self.extractDataSignal(signal[len(signal1):len(signal)]))
+        print("signal2", len(signal2))
+        signal3=Numpy.array(self.extractDataSignal(signal[len(signal2)+len(signal1):len(signal)]))
+        signal4=Numpy.array(self.extractDataSignal(signal[len(signal3)+len(signal2)+len(signal1):len(signal)]))
 
-        chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
-        bitVectors = Numpy.zeros((2040,1))
+        chunks1 = signal1.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
+        chunks2 = signal2.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
+        chunks3 = signal3.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
+        chunks4 = signal4.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
+        chunks=Numpy.concatenate([chunks1,chunks2,chunks3,chunks4])
+        bitVectors=[]
         i=0
         debug=False
         for chunk in chunks:
             print("CHUNK NB",i)
-            if (i>728 or i<5):
-                debug=True
-            bitVectors[i]=self.decodeSignalChunkToBitVector(chunk, nonoise,debug)
+            debug=True
+            bitVectors.append(self.decodeSignalChunkToBitVector(chunk, nonoise,debug))
             print(bitVectors[i])
             debug=False
             i=1+i
-        return bitVectors
+        return Numpy.array(bitVectors)
 
-<<<<<<< HEAD
     def decodeSignalChunkToBitVector(self, chunk, nonoise,debug):
 
         w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
@@ -170,13 +160,12 @@ class Synthesizer:
         #print(f)
         p1=w[9]+w[10]
         p2=w[12]+w[13]
-        print(p1,p2)
+        #print(p1,p2)
         if (p1>p2):
             return [int(1)]
         else :
             return [int(0)]
-=======
-    def decodeSignalChunkToBitVector(self, chunk, nonoise):
+    """def decodeSignalChunkToBitVector(self, chunk, nonoise):
         # Plot.plot(chunk)
         # Plot.show()
         w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
@@ -188,9 +177,9 @@ class Synthesizer:
 
         # Plot.plot(f, w)
         # Plot.show()
->>>>>>> 9ef6e8e48e3256a74da30efb79d2a51339b32c72
 
         if (Numpy.abs(2789-freq)<Numpy.abs(2027-freq)):
             return [0]
         else :
             return [1]
+            """
