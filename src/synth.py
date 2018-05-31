@@ -111,6 +111,10 @@ class Synthesizer:
             dots.append(
                 self.decodeSignalChunkToBitVector(chunk, nonoise))
 
+        print("DOTS")
+        Plot.plot(dots)
+        Plot.show()
+
         myMid = Numpy.sum(dots) / len(dots)
 
         myBits = list(map(lambda x: [0] if x < myMid else[1], dots))

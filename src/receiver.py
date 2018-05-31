@@ -15,9 +15,9 @@ if __name__ == "__main__":
     noNoise = synthesizer.detectNoise()
 
     print("Recording Signal")
-    #recording = synthesizer.recordSignal()
-    #Numpy.save("recording_fourierv22", recording)
-    recording = Numpy.load("highlow.npy")
+    # recording = synthesizer.recordSignal()
+    # Numpy.save("highlowreal.npy", recording)
+    recording = Numpy.load("highlowreal.npy")
 
     print("Extracting Data Signal")
     dataSignal = synthesizer.extractDataSignal(recording)
