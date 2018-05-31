@@ -34,9 +34,13 @@ class Synthesizer:
 
     def generateCompleteSignal(self, array, nonoise):
         signal = Numpy.zeros(0)
+        sync=self.createWhiteNoise()
         savedSignalDict = {}
 
+        i=0
         for a in array:
+            if (i%500==0):
+                signal=Numpy.concatenate([signal,Numpy.zeros(Lib.SAMPLES_PER_SEC),sync])
             if (repr(a) in savedSignalDict):
                 signal = Numpy.concatenate(
                     [signal, savedSignalDict.get(repr(a))])
@@ -44,6 +48,7 @@ class Synthesizer:
                 inter = self.generateVectorSignal(a, nonoise)
                 savedSignalDict[repr(a)] = inter
                 signal = Numpy.concatenate([signal, inter])
+            i=i+1
 
         return signal
 
@@ -83,12 +88,12 @@ class Synthesizer:
 
         return recording
 
-    def extractDataSignal(self, record):
+    def extractDataSignal(self, record,last):
         noiseToSyncOn = self.createWhiteNoise()
 
         maxDotProduct = 0
         index = 0
-        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+        for i in range(0, 4*44100):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
@@ -96,10 +101,12 @@ class Synthesizer:
                 index = i
 
         begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
-        #begin=181815
-        end = begin + int(Lib.NUMBER_DATA_SAMPLES)
-
+        print(begin)
+        end = begin + int(500*Lib.ELEMENTS_PER_CHUNK)
+        if(last):
+            end=begin+int(40*Lib.ELEMENTS_PER_CHUNK)
         bla = record[begin:end]
+        print("bla",len(bla))
         Plot.plot(1.5 * record)
         Plot.plot(Numpy.concatenate([Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
         Plot.show()
@@ -109,22 +116,48 @@ class Synthesizer:
     def decodeSignalToBitVectors(self, signal, nonoise):
         #chunks = [signal[i:i + Lib.SAMPLES_PER_CHUNK]
         #          for i in range(0, len(signal), Lib.SAMPLES_PER_CHUNK)]
-        chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
-        bitVectors = []
-        for chunk in chunks:
-            bitVectors.append(
-                self.decodeSignalChunkToBitVector(chunk, nonoise))
 
+        print("signal",len(signal))
+        signal1=self.extractDataSignal(signal,False)
+        print("signal1",len(signal1))
+        signal2=self.extractDataSignal(signal[len(signal1):len(signal)],False)
+        signal3=self.extractDataSignal(signal[len(signal2):len(signal)],False)
+        signal4=self.extractDataSignal(signal[len(signal3):len(signal)],True)
+
+        chunks = signal.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
+        bitVectors = Numpy.zeros((2040,1))
+        i=0
+        debug=False
+        for chunk in chunks:
+            print("CHUNK NB",i)
+            if (i>728 or i<5):
+                debug=True
+            bitVectors[i]=self.decodeSignalChunkToBitVector(chunk, nonoise,debug)
+            print(bitVectors[i])
+            debug=False
+            i=1+i
         return bitVectors
 
-    def decodeSignalChunkToBitVector(self, chunk, nonoise):
-        Plot.plot(chunk)
-        Plot.show()
+    def decodeSignalChunkToBitVector(self, chunk, nonoise,debug):
+
         w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
         f = Numpy.abs(Numpy.fft.fftfreq(len(w), 1 / Lib.SAMPLES_PER_SEC))
 
-        Plot.plot(f, w)
-        Plot.show()
+        #if(debug):
+            #Plot.plot(chunk)
+            #Plot.show()
+            #Plot.plot(f, w)
+            #Plot.show()
+        #print(w.shape, f.shape)
+        #print(w)
+        #print(f)
+        p1=w[9]+w[10]
+        p2=w[12]+w[13]
+        print(p1,p2)
+        if (p1>p2):
+            return [int(1)]
+        else :
+            return [int(0)]
 
         '''
         peaks = np.empty(2*ones)
