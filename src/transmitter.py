@@ -34,5 +34,7 @@ if __name__ == "__main__":
 
     print(signalToSend)
     print("Done")
+    #myrecording = SoundDevice.playrec(Numpy.concatenate([Numpy.zeros(2000), signalToSend]), Lib.SAMPLES_PER_SEC, channels=1)
+    #Numpy.save("rec_noise2_0p05", myrecording)
     SoundDevice.play(signalToSend)
     SoundDevice.wait()

@@ -10,6 +10,7 @@ class Synthesizer:
         pass
 
     def detectNoise(self):
+        return 2
         SoundDevice.default.channels = 1
         record = SoundDevice.rec(Lib.SAMPLES_PER_SEC * Lib.NOISE_DETECTION_TIME,
                                  Lib.SAMPLES_PER_SEC,
@@ -212,8 +213,8 @@ class Synthesizer:
         w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
         f = Numpy.abs(Numpy.fft.fftfreq(len(w), 1 / Lib.SAMPLES_PER_SEC))
 
-        idx = Numpy.argmax(w)
-        freq = f[idx]
+        idx = Numpy.argmax(w[5:12])
+        freq = f[idx+5]
         print(freq)
         # Plot.plot(f, w)
         # Plot.show()
