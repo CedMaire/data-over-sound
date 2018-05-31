@@ -2,6 +2,9 @@ import numpy as Numpy
 import lib as Lib
 import sounddevice as SoundDevice
 import matplotlib.pyplot as Plot
+from scipy.signal import find_peaks_cwt
+from scipy.interpolate import interp1d
+import peakutils
 
 
 class Synthesizer:
@@ -93,6 +96,7 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
+<<<<<<< HEAD
         for i in range(0, 4*44100):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
@@ -105,6 +109,18 @@ class Synthesizer:
         end = begin + int(500*Lib.ELEMENTS_PER_CHUNK)
         if(last):
             end=begin+int(40*Lib.ELEMENTS_PER_CHUNK)
+=======
+        # for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+        #     dotProduct = Numpy.dot(noiseToSyncOn,
+        #                            record[i:Lib.NUMBER_NOISE_SAMPLES + i])
+        #     if (dotProduct > maxDotProduct):
+        #         maxDotProduct = dotProduct
+        #         index = i
+        #
+        # begin = index + int(Lib.NUMBER_NOISE_SAMPLES)
+        begin=115152
+        end = begin + int(Lib.NUMBER_DATA_SAMPLES)
+>>>>>>> 9ef6e8e48e3256a74da30efb79d2a51339b32c72
         bla = record[begin:end]
         print("bla",len(bla))
         Plot.plot(1.5 * record)
@@ -138,6 +154,7 @@ class Synthesizer:
             i=1+i
         return bitVectors
 
+<<<<<<< HEAD
     def decodeSignalChunkToBitVector(self, chunk, nonoise,debug):
 
         w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
@@ -158,26 +175,22 @@ class Synthesizer:
             return [int(1)]
         else :
             return [int(0)]
+=======
+    def decodeSignalChunkToBitVector(self, chunk, nonoise):
+        # Plot.plot(chunk)
+        # Plot.show()
+        w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
+        f = Numpy.abs(Numpy.fft.fftfreq(len(w), 1 / Lib.SAMPLES_PER_SEC))
 
-        '''
-        peaks = np.empty(2*ones)
-        i = 0
-        for x in range(2*ones):
-            idx = np.argmax(np.abs(w))
-            freq = f[idx]
-            freq_in_hertz = abs(freq * frequence)
-            peaks[i]=freq_in_hertz
-            w = np.delete(w, idx)
-            idx = np.argmax(np.abs(w))
-            w = np.delete(w, idx)
-            i+=1
-        peaks=np.sort(peaks)
-        return peaks
-        '''
+        idx = Numpy.argmax(w)
+        freq = f[idx]
+        print(freq)
 
+        # Plot.plot(f, w)
+        # Plot.show()
+>>>>>>> 9ef6e8e48e3256a74da30efb79d2a51339b32c72
 
-if __name__ == "__main__":
-    synthesizer = Synthesizer()
-
-    synthesizer.decodeSignalChunkToBitVector(
-        Numpy.sin(2 * Numpy.pi * Numpy.arange(Lib.SAMPLES_PER_CHUNK) * 1500 / Lib.SAMPLES_PER_SEC), 1)
+        if (Numpy.abs(2789-freq)<Numpy.abs(2027-freq)):
+            return [0]
+        else :
+            return [1]
