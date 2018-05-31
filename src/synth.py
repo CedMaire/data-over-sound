@@ -35,6 +35,25 @@ class Synthesizer:
         return Numpy.random.normal(0, 1, Lib.NUMBER_NOISE_SAMPLES)
 
     def generateCompleteSignal(self, array, nonoise):
+        sync = self.createWhiteNoise()
+        zeros=Numpy.zeros(Lib.SAMPLES_PER_SEC)
+        sin0 = self.generateVectorSignal(Numpy.array([0]), nonoise)
+        sin1 = self.generateVectorSignal(Numpy.array([1]), nonoise)
+        sins = Numpy.zeros([2, len(sin0)])
+        sins[0, :] = sin0
+        sins[1, :] = sin1 # c'est moche mais c'est pour matcher avec votre truc
+        array1=array[0:510]
+        array2=array[510:1020]
+        array3=array[1020:1530]
+        array4=array[1530:2040]
+        sins1=sins[array1, :].reshape([-1])
+        sins2=sins[array2, :].reshape([-1])
+        sins3=sins[array3, :].reshape([-1])
+        sins4=sins[array4, :].reshape([-1])
+        return Numpy.concatenate([sync,sins1,zeros,sync,sins2,zeros,sync,sins3,zeros,sync,sins4])
+
+
+        """
         signal = Numpy.zeros(0)
         sync = self.createWhiteNoise()
         savedSignalDict = {}
@@ -54,7 +73,7 @@ class Synthesizer:
             i = i+1
 
         return signal
-
+        """
     def generateVectorSignal(self, vector, nonoise):
         frequencies = []
 
