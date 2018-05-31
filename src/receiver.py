@@ -16,15 +16,16 @@ if __name__ == "__main__":
     print("Detecting Noise")
     noNoise = synthesizer.detectNoise()
     print("Recording Signal")
-    recording = synthesizer.recordSignal()
+    #recording = synthesizer.recordSignal()
     #Numpy.save("recording_pierre", recording)
-    #recording = Numpy.load("recording_pierre.npy")
+    recording = Numpy.load("recording_pierre.npy")
     Plot.plot(recording)
     Plot.show()
     print("Extracting Data Signal")
     dataSignal = synthesizer.extractDataSignal(recording)
     #receivedVectors = synthesizer.decodeSignalToBitVector(dataSignal, noNoise)
-    receivedVectors_vec = [synthesizer.decodeur2LEspace(dataSignal, noNoise) , synthesizer.decodeur3LEspace(dataSignal, noNoise), synthesizer.decodeur3LEspace(dataSignal, noNoise, True)]
+    #receivedVectors_vec = [synthesizer.decodeur2LEspace(dataSignal, noNoise), synthesizer.decodeur3LEspace(dataSignal, noNoise), synthesizer.decodeur3LEspace(dataSignal, noNoise, True)]
+    receivedVectors_vec = [synthesizer.decodeur3LEspace(dataSignal, noNoise)]
 
 
     for receivedVectors in receivedVectors_vec:

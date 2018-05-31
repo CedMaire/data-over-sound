@@ -118,7 +118,7 @@ class Synthesizer:
         maxDotProduct = 0
         index = 0
 
-        for i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
+        ''' i in range(int(Numpy.floor(record.size - (Lib.NUMBER_DATA_SAMPLES + Lib.NUMBER_NOISE_SAMPLES)))):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
             if (dotProduct > maxDotProduct):
@@ -126,9 +126,9 @@ class Synthesizer:
                 index = i
 
         begin = int(index + Lib.NUMBER_NOISE_SAMPLES)
-        print(begin)
+        print(begin)'''
 
-        #begin=139406
+        begin=112360
         end = int(begin + Lib.NUMBER_DATA_SAMPLES)
 
         bla = record[begin:end]
@@ -151,21 +151,26 @@ class Synthesizer:
         absconv = np.abs(conv)
         resultArray=[]
         current = 0
+        currents = []
         if dephase:
             period_size = int(Lib.SAMPLES_PER_SEC / (2*f))
         else:
             period_size = 0
         for i in range(Lib.NEEDED_AMOUNT_OF_VECTORS):
             current = current + Lib.ELEMENTS_PER_CHUNK
-            window = absconv[max(0,current-period_size):min(len(absconv),current+period_size)]
+            window = absconv[max(0,current):min(len(absconv),current+period_size)]
             if len(window) > 0:
-                current = current + np.argmax(absconv[current-period_size:current+period_size])
-            if current > Lib.NEEDED_AMOUNT_OF_VECTORS:
+                current = current + np.argmax(window)
+            currents.append(current-Lib.ELEMENTS_PER_CHUNK)
+            if current > len(conv):
                 break
             if conv[current] >= 0:
                 resultArray.append([1])
             else:
                 resultArray.append([0])
+        currents = np.array(currents)[:-1]
+        zeros = conv[currents + Lib.ELEMENTS_PER_CHUNK]
+        Plot.scatter(currents/Lib.ELEMENTS_PER_CHUNK, zeros/4)
         while len(resultArray) < Lib.NEEDED_AMOUNT_OF_VECTORS:
             resultArray.append([0])
         return resultArray
