@@ -1,8 +1,0 @@
-https://github.com/rraval/pied-piper
-https://pypi.org/project/reedsolo/
-https://pypi.org/project/unireedsolomon/
-https://github.com/fredrik-johansson/mpmath
-http://mpmath.org/doc/current/index.html
-https://jarrodkahn.com/posts/49/viterbi-algorithm/
-https://stackoverflow.com/questions/9729968/python-implementation-of-viterbi-algorithm
-https://commpy.readthedocs.io/en/latest/channelcoding.html#convolutional-codes
