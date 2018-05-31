@@ -11,7 +11,6 @@ class Synthesizer:
         pass
 
     def detectNoise(self):
-        return 2
         record = SoundDevice.rec(Lib.SAMPLES_PER_SEC * Lib.NOISE_DETECTION_TIME,
                                  Lib.SAMPLES_PER_SEC,
                                  blocking=True,
@@ -19,8 +18,8 @@ class Synthesizer:
 
         recordfft = Numpy.fft.fft(record)
 
-        sum1000 = Numpy.sum(Numpy.abs(recordfft[1000:2000]))
-        sum2000 = Numpy.sum(Numpy.abs(recordfft[2000:3000]))
+        sum1000 = Numpy.sum(Numpy.abs(recordfft[2000:4000]))
+        sum2000 = Numpy.sum(Numpy.abs(recordfft[4000:6000]))
 
         if (sum1000 > sum2000):
             print("Noise-free Frequencies: [2000:3000]")
@@ -36,22 +35,21 @@ class Synthesizer:
 
     def generateCompleteSignal(self, array, nonoise):
         sync = self.createWhiteNoise()
-        zeros=Numpy.zeros(Lib.SAMPLES_PER_SEC)
+        zeros = Numpy.zeros(Lib.SAMPLES_PER_SEC)
         sin0 = self.generateVectorSignal(Numpy.array([0]), nonoise)
         sin1 = self.generateVectorSignal(Numpy.array([1]), nonoise)
         sins = Numpy.zeros([2, len(sin0)])
         sins[0, :] = sin0
-        sins[1, :] = sin1 # c'est moche mais c'est pour matcher avec votre truc
-        array1=array[0:510]
-        array2=array[510:1020]
-        array3=array[1020:1530]
-        array4=array[1530:2040]
-        sins1=sins[array1, :].reshape([-1])
-        sins2=sins[array2, :].reshape([-1])
-        sins3=sins[array3, :].reshape([-1])
-        sins4=sins[array4, :].reshape([-1])
-        return Numpy.concatenate([sync,sins1,zeros,sync,sins2,zeros,sync,sins3,zeros,sync,sins4])
-
+        sins[1, :] = sin1  # c'est moche mais c'est pour matcher avec votre truc
+        array1 = array[0:510]
+        array2 = array[510:1020]
+        array3 = array[1020:1530]
+        array4 = array[1530:2040]
+        sins1 = sins[array1, :].reshape([-1])
+        sins2 = sins[array2, :].reshape([-1])
+        sins3 = sins[array3, :].reshape([-1])
+        sins4 = sins[array4, :].reshape([-1])
+        return Numpy.concatenate([sync, sins1, zeros, sync, sins2, zeros, sync, sins3, zeros, sync, sins4])
 
         """
         signal = Numpy.zeros(0)
@@ -74,20 +72,21 @@ class Synthesizer:
 
         return signal
         """
+
     def generateVectorSignal(self, vector, nonoise):
         frequencies = []
 
         for i in range(0, Lib.CHUNK_SIZE):
             if (vector[i] == 1):
                 if (nonoise == 1):
-                    frequencies.append(int(1027))
+                    frequencies.append(int(1021))
                     # Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
                 else:
                     frequencies.append(int(2027))
                     # Lib.UPPER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
             else:
                 if (nonoise == 1):
-                    frequencies.append(int(1234))
+                    frequencies.append(int(1913))
                     # Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP * (i + 1)))
                 else:
                     frequencies.append(int(2789))
@@ -115,7 +114,7 @@ class Synthesizer:
 
         maxDotProduct = 0
         index = 0
-        endsearch=4*44100
+        endsearch = 4*44100
         for i in range(0, endsearch):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    record[i:Lib.NUMBER_NOISE_SAMPLES + i])
@@ -140,13 +139,16 @@ class Synthesizer:
         # chunks = [signal[i:i + Lib.SAMPLES_PER_CHUNK]
         #          for i in range(0, len(signal), Lib.SAMPLES_PER_CHUNK)]
 
-        print("signal",len(signal))
-        signal1=Numpy.array(self.extractDataSignal(signal))
-        print("signal1",len(signal1))
-        signal2=Numpy.array(self.extractDataSignal(signal[len(signal1)+Lib.NUMBER_NOISE_SAMPLES:len(signal)]))
+        print("signal", len(signal))
+        signal1 = Numpy.array(self.extractDataSignal(signal))
+        print("signal1", len(signal1))
+        signal2 = Numpy.array(self.extractDataSignal(
+            signal[len(signal1)+Lib.NUMBER_NOISE_SAMPLES:len(signal)]))
         print("signal2", len(signal2))
-        signal3=Numpy.array(self.extractDataSignal(signal[len(signal2)+len(signal1)+2*Lib.NUMBER_NOISE_SAMPLES:len(signal)]))
-        signal4=Numpy.array(self.extractDataSignal(signal[len(signal3)+len(signal2)+len(signal1)+4*Lib.NUMBER_NOISE_SAMPLES:len(signal)]))
+        signal3 = Numpy.array(self.extractDataSignal(
+            signal[len(signal2)+len(signal1)+2*Lib.NUMBER_NOISE_SAMPLES:len(signal)]))
+        signal4 = Numpy.array(self.extractDataSignal(signal[len(
+            signal3)+len(signal2)+len(signal1)+4*Lib.NUMBER_NOISE_SAMPLES:len(signal)]))
 
         chunks1 = signal1.reshape([-1, Lib.ELEMENTS_PER_CHUNK])
         chunks2 = signal2.reshape([-1, Lib.ELEMENTS_PER_CHUNK])

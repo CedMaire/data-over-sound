@@ -17,8 +17,8 @@ if __name__ == "__main__":
 
     print("Recording Signal")
     recording = synthesizer.recordSignal()
-    # Numpy.save("recording_fourierv22", recording)
-    # recording = Numpy.load("recording_fourierv22.npy")
+    # Numpy.save("taaaaaaaag00.npy", recording)
+    # recording = Numpy.load("taaaaaaaag00.npy")
     Plot.plot(recording)
     Plot.show()
 
