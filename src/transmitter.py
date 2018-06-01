@@ -273,9 +273,9 @@ if __name__ == "__main__":
     #signalToSend2 = synthesizer.generateCompleteSignal(vectorsToSend[1020,2040], nonoise)
     #signalToSend=Numpy.concatenate([signalToSend1,signalToSend2])
     print("RECORDING!")
-    # recording = synthesizer.recordSignal()
-    # Numpy.save("nonoise2_2040_4", recording)
-    recording = Numpy.load("nonoise1_2040_4.npy")
+    recording = synthesizer.recordSignal()
+    Numpy.save("lastrecord", recording)
+    # recording = Numpy.load("nonoise1_2040_4.npy")
 
     # recording = Numpy.array(
     #     list(map(lambda x: 0 if (abs(x) < Lib.MAGIC_THRESHOLD) else x, recording.tolist())))
