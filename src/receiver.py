@@ -11,8 +11,9 @@ if __name__ == "__main__":
     print("Detecting Noise")
     noNoise = synthesizer.detectNoise()
     print("Recording Signal")
-    recording = synthesizer.recordSignal()
-    Numpy.save("lastrecord", recording)
+    #recording = synthesizer.recordSignal()
+    #Numpy.save("lastrecord", recording)
+    recording = Numpy.load("lastrecord.npy")
     print("Extracting Data Signal")
     dataSignal = synthesizer.extractDataSignal(recording)
     # for i in range(39):

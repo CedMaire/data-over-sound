@@ -149,7 +149,7 @@ class Synthesizer:
             begin = end + Lib.SAMPLES_PER_SEC
             end = begin + int(51*Lib.ELEMENTS_PER_CHUNK)
             bla = Numpy.concatenate([bla, record[begin:end]])
-            #plot = Numpy.concatenate([plot, Numpy.zeros(Lib.SAMPLES_PER_SEC), bla])
+            plot = Numpy.concatenate([plot, Numpy.zeros(Lib.SAMPLES_PER_SEC), bla])
 
 
 
