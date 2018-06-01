@@ -269,7 +269,9 @@ if __name__ == "__main__":
     # print(len(vectorsToSend))
 
     nonoise = 1
-    # signalToSend = synthesizer.generateCompleteSignal(vectorsToSend, nonoise)
+    #signalToSend1 = synthesizer.generateCompleteSignal(vectorsToSend[0,1020], nonoise)
+    #signalToSend2 = synthesizer.generateCompleteSignal(vectorsToSend[1020,2040], nonoise)
+    #signalToSend=Numpy.concatenate([signalToSend1,signalToSend2])
     print("RECORDING!")
     # recording = synthesizer.recordSignal()
     # Numpy.save("nonoise2_2040_4", recording)
@@ -285,7 +287,11 @@ if __name__ == "__main__":
     Plot.plot(signalToSend)
     Plot.show()
 
-    data = synthesizer.extractDataSignal(signalToSend)
+    data,stop = synthesizer.extractDataSignal(signalToSend)
+    data2,s=synthesizer.extractDataSignal(signalToSend[stop:len(signalToSend)])
+    data=Numpy.concatenate([data,data2])
+    Plot.plot(data)
+    Plot.show()
     receivedVectors = synthesizer.decodeSignalToBitVectors(data, nonoise)
     print("receivedVectors")
     print(receivedVectors)

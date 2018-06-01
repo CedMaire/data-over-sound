@@ -52,7 +52,7 @@ class Synthesizer:
         maxDotProduct = 0
         index = 0
 
-        for i in range(0, len(recording) - Lib.NUMBER_NOISE_SAMPLES - Lib.NUMBER_DATA_SAMPLES - Lib.NUMBER_ZEROS_SAMPLES_TOTAL):
+        for i in range(0, 4*Lib.FS):#len(recording) - Lib.NUMBER_NOISE_SAMPLES - Lib.NUMBER_DATA_SAMPLES - Lib.NUMBER_ZEROS_SAMPLES_TOTAL):
             dotProduct = Numpy.dot(noiseToSyncOn,
                                    recording[i:i + Lib.NUMBER_NOISE_SAMPLES])
             if (dotProduct > maxDotProduct):
@@ -69,7 +69,7 @@ class Synthesizer:
         # Plot.show()
 
         data = Numpy.zeros(0)
-        for j in range(0, Lib.NUMBER_VECTOR_GROUPS):
+        for j in range(0, int(Lib.NUMBER_VECTOR_GROUPS/2)):
             start = j * (Lib.NUMBER_SAMPLES_PER_VECTORS_CHUNK +
                          Lib.NUMBER_ZEROS_SAMPLES - Lib.MAGIC_NUMBER)
             stop = start + Lib.NUMBER_SAMPLES_PER_VECTORS_CHUNK
@@ -83,20 +83,20 @@ class Synthesizer:
             # Plot.show()
 
         dataInterleaved = Numpy.zeros(0)
-        dataReshaped = data.reshape([-1, Lib.NUMBER_SAMPLES_PER_VECTORS_CHUNK])
-        for k, vectorsChunk in enumerate(dataReshaped):
-            chunk = vectorsChunk if (k == 0) else Numpy.concatenate(
-                [Numpy.zeros(Lib.NUMBER_ZEROS_SAMPLES), vectorsChunk])
-            dataInterleaved = Numpy.concatenate([dataInterleaved, chunk])
+        #dataReshaped = data.reshape([-1, int(Lib.NUMBER_SAMPLES_PER_VECTORS_CHUNK/2)])
+        #for k, vectorsChunk in enumerate(dataReshaped):
+        #    chunk = vectorsChunk if (k == 0) else Numpy.concatenate(
+        #        [Numpy.zeros(Lib.NUMBER_ZEROS_SAMPLES), vectorsChunk])
+        #    dataInterleaved = Numpy.concatenate([dataInterleaved, chunk])
 
-        Plot.plot(1.2 * recording)
-        Plot.plot(Numpy.concatenate([Numpy.zeros(begin),
-                                     dataInterleaved,
-                                     Numpy.zeros(len(
-                                         recording) - Lib.NUMBER_NOISE_SAMPLES - Lib.NUMBER_DATA_SAMPLES - (begin - Lib.NUMBER_NOISE_SAMPLES) - Lib.NUMBER_ZEROS_SAMPLES_TOTAL)]))
-        Plot.show()
+    #    Plot.plot(1.2 * recording)
+    #    Plot.plot(Numpy.concatenate([Numpy.zeros(begin),
+    #                                 dataInterleaved,
+    #                                 Numpy.zeros(len(
+    #                                     recording) - Lib.NUMBER_NOISE_SAMPLES - Lib.NUMBER_DATA_SAMPLES - (begin - Lib.NUMBER_NOISE_SAMPLES) - Lib.NUMBER_ZEROS_SAMPLES_TOTAL)]))
+    #    Plot.show()
 
-        return data
+        return data,stop
 
     def recordSignal(self):
         recording = SoundDevice.rec(Lib.RECORDING_SAMPLES_TOTAL,
