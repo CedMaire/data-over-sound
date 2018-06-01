@@ -41,7 +41,7 @@ if __name__ == "__main__":
     else:
         # Try to flip the bits?
         print(decodedTuple[1])
-
+    """
     stringRead = io.readFile(Lib.FILENAME_READ)
     encodedVectors = coder.encode(stringRead)
     flattenReal = Numpy.array(encodedVectors).flatten()
@@ -54,3 +54,4 @@ if __name__ == "__main__":
     counted = Numpy.sum(Numpy.array(compared))
 
     print("ERRORS: ", counted)
+    """

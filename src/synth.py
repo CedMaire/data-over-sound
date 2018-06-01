@@ -128,10 +128,10 @@ class Synthesizer:
 
         bla = record[begin:end]
         print("bla", len(bla))
-        Plot.plot(1.5 * record)
-        Plot.plot(Numpy.concatenate(
-            [Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
-        Plot.show()
+        #Plot.plot(1.5 * record)
+        #Plot.plot(Numpy.concatenate(
+        #    [Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
+        #Plot.show()
 
         return bla
 
@@ -168,9 +168,11 @@ class Synthesizer:
             i = 1+i
         return Numpy.array(bitVectors)
 
+
+    """
     def decodeSignalChunkToBitVector(self, chunk, nonoise, debug):
 
-        w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
+        w = Numpy.abs(Numpy.fft.fft(chunk))
         f = Numpy.abs(Numpy.fft.fftfreq(len(w), 1 / Lib.SAMPLES_PER_SEC))
 
         # if(debug):
@@ -188,21 +190,27 @@ class Synthesizer:
             return [int(1)]
         else:
             return [int(0)]
-    """def decodeSignalChunkToBitVector(self, chunk, nonoise):
+        """
+    def decodeSignalChunkToBitVector(self, chunk, nonoise, false):
         # Plot.plot(chunk)
         # Plot.show()
-        w = Numpy.abs(Numpy.fft.fft(chunk[1800:2000]))
+        w = Numpy.abs(Numpy.fft.fft(chunk))
         f = Numpy.abs(Numpy.fft.fftfreq(len(w), 1 / Lib.SAMPLES_PER_SEC))
 
-        idx = Numpy.argmax(w)
-        freq = f[idx]
+        idx = Numpy.argmax(w[1:len(w)])
+        freq = f[idx+1]
         print(freq)
 
         # Plot.plot(f, w)
         # Plot.show()
 
-        if (Numpy.abs(2789-freq)<Numpy.abs(2027-freq)):
-            return [0]
-        else :
-            return [1]
-            """
+        if (nonoise==2):
+            if (Numpy.abs(2789-freq)<Numpy.abs(2027-freq)):
+                return [0]
+            else :
+                return [1]
+        else:
+            if (Numpy.abs(1919-freq)<Numpy.abs(1021-freq)):
+                return [0]
+            else :
+                return [1]
