@@ -12,6 +12,7 @@ class Synthesizer:
         pass
 
     def detectNoise(self):
+        return 2
         SoundDevice.default.channels = 1
         record = SoundDevice.rec(Lib.SAMPLES_PER_SEC * Lib.NOISE_DETECTION_TIME,
                                  Lib.SAMPLES_PER_SEC,
@@ -93,7 +94,7 @@ class Synthesizer:
             freqs = self.computeFrequencies(vector, Lib.LOWER_LOW_FREQUENCY_BOUND) if (nonoise == 1) \
             else self.computeFrequencies(vector, Lib.LOWER_UPPER_FREQUENCY_BOUND)
         """
-        f = 1500 if nonoise == 1 else 2500
+        f = 1900 if nonoise == 1 else 2500
         t = Numpy.arange(Lib.ELEMENTS_PER_CHUNK)
         signal = Numpy.zeros(t.shape)
         if(vector[0] == 1):
@@ -146,7 +147,7 @@ class Synthesizer:
         sinus = Numpy.zeros([phaseSeeker, len(t)])
 
         if (nonoise == 1):
-            f = Lib.LOWER_LOW_FREQUENCY_BOUND + Lib.FREQUENCY_STEP
+            f = Lib.LOWER_LOW_FREQUENCY_BOUND + 900
         else:
             f = Lib.LOWER_UPPER_FREQUENCY_BOUND + Lib.FREQUENCY_STEP
 
