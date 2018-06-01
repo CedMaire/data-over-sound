@@ -19,8 +19,8 @@ class Synthesizer:
                                  channels=1)[:, 0]
 
         recordfft = Numpy.fft.fft(record)
-        Plot.plot(recordfft)
-        Plot.show()
+        #Plot.plot(recordfft)
+        #Plot.show()
         sum1000 = Numpy.sum(Numpy.abs(recordfft[2000:4000]))
         sum2000 = Numpy.sum(Numpy.abs(recordfft[4000:6000]))
 
@@ -60,9 +60,9 @@ class Synthesizer:
     def generateCompleteSignal(self, array, nonoise):
         sin0 = self.generateVectorSignal(Numpy.array([0]), nonoise)
         sin1 = self.generateVectorSignal(Numpy.array([1]), nonoise)
-        Plot.plot(sin0)
-        Plot.plot(sin1)
-        Plot.show()
+        #Plot.plot(sin0)
+        #Plot.plot(sin1)
+        #Plot.show()
         sins = Numpy.zeros([2, len(sin0)])
         sins[0, :] = sin0
         sins[1, :] = sin1  # c'est moche mais c'est pour matcher avec votre truc
@@ -109,8 +109,8 @@ class Synthesizer:
                               Lib.SAMPLES_PER_SEC,
                               blocking=True,
                               channels=1)[:, 0]
-        Plot.plot(bla)
-        Plot.show()
+        #Plot.plot(bla)
+        #Plot.show()
         return bla
 
     def extractDataSignal(self, record):
@@ -131,9 +131,9 @@ class Synthesizer:
         end = begin + int(Lib.NUMBER_DATA_SAMPLES)
 
         bla = record[begin:end]
-        Plot.plot(1.5 * record)
-        Plot.plot(Numpy.concatenate([Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
-        Plot.show()
+        #Plot.plot(1.5 * record)
+        #Plot.plot(Numpy.concatenate([Numpy.zeros(begin), bla, Numpy.zeros(end - begin)]))
+        #Plot.show()
 
         return bla
 
